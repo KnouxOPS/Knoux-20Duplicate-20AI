@@ -128,10 +128,7 @@ export default function HelpPage() {
             </p>
           </div>
 
-          <Button
-            onClick={() => setCurrentPage("dashboard")}
-            variant="outline"
-          >
+          <Button onClick={() => setCurrentPage("dashboard")} variant="outline">
             Back
           </Button>
         </div>
@@ -179,7 +176,9 @@ export default function HelpPage() {
               </div>
 
               <div className="text-xs text-muted-foreground pt-4 border-t border-border">
-                <p>Version 1.0.0 • Built with React, TypeScript & TailwindCSS</p>
+                <p>
+                  Version 1.0.0 • Built with React, TypeScript & TailwindCSS
+                </p>
               </div>
             </div>
           </section>
@@ -304,7 +303,7 @@ export default function HelpPage() {
                 className="bg-primary hover:bg-primary/90 text-white"
                 onClick={() =>
                   alert(
-                    "Email support: support@knoux.com\nThis is a demo - use the contact form in the full version"
+                    "Email support: support@knoux.com\nThis is a demo - use the contact form in the full version",
                   )
                 }
               >

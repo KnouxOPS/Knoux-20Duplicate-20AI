@@ -73,8 +73,7 @@ export const restoreFromTrash: RequestHandler = async (req, res) => {
   } catch (error) {
     logger.error("Failed to restore file", { error });
     res.status(500).json({
-      error:
-        error instanceof Error ? error.message : "Failed to restore file",
+      error: error instanceof Error ? error.message : "Failed to restore file",
     });
   }
 };
@@ -125,8 +124,7 @@ export const emptyTrash: RequestHandler = async (req, res) => {
   } catch (error) {
     logger.error("Failed to empty trash", { error });
     res.status(500).json({
-      error:
-        error instanceof Error ? error.message : "Failed to empty trash",
+      error: error instanceof Error ? error.message : "Failed to empty trash",
     });
   }
 };

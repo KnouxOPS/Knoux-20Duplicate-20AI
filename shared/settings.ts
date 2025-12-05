@@ -90,7 +90,7 @@ export function validateSettings(settings: any): settings is KnouxSettings {
  * Merge settings with defaults
  */
 export function mergeWithDefaults(
-  partial: Partial<KnouxSettings>
+  partial: Partial<KnouxSettings>,
 ): KnouxSettings {
   return {
     ...DEFAULT_SETTINGS,

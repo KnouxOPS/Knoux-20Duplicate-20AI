@@ -98,7 +98,9 @@ class SafeTrash {
    */
   emptyTrash(): number {
     const count = this.trashBin.size;
-    const deletedFiles = Array.from(this.trashBin.values()).map((e) => e.fileName);
+    const deletedFiles = Array.from(this.trashBin.values()).map(
+      (e) => e.fileName,
+    );
 
     this.trashBin.clear();
 

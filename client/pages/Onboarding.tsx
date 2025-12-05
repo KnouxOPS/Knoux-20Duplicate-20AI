@@ -6,13 +6,18 @@ import { ChevronRight, ChevronLeft, Check } from "lucide-react";
 type OnboardingStep = "folders" | "filetypes" | "ai";
 
 export default function Onboarding() {
-  const { setCurrentPage, updateSettings, settings, setHasCompletedOnboarding } = useApp();
+  const {
+    setCurrentPage,
+    updateSettings,
+    settings,
+    setHasCompletedOnboarding,
+  } = useApp();
   const [step, setStep] = useState<OnboardingStep>("folders");
   const [selectedFolders, setSelectedFolders] = useState<string[]>(
-    settings.scanPaths
+    settings.scanPaths,
   );
   const [selectedFileTypes, setSelectedFileTypes] = useState<string[]>(
-    settings.fileTypes
+    settings.fileTypes,
   );
   const [aiSensitivity, setAiSensitivity] = useState(settings.aiSensitivity);
 
@@ -28,7 +33,7 @@ export default function Onboarding() {
 
   const toggleFileType = (id: string) => {
     setSelectedFileTypes((prev) =>
-      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((t) => t !== id) : [...prev, id],
     );
   };
 
@@ -89,11 +94,7 @@ export default function Onboarding() {
                     : "bg-border text-muted-foreground"
                 }`}
               >
-                {num < getStepNumber() ? (
-                  <Check className="w-5 h-5" />
-                ) : (
-                  num
-                )}
+                {num < getStepNumber() ? <Check className="w-5 h-5" /> : num}
               </div>
               {num < 3 && (
                 <div
@@ -146,11 +147,13 @@ export default function Onboarding() {
                         key={idx}
                         className="flex items-center justify-between p-3 bg-muted rounded-lg"
                       >
-                        <span className="text-sm text-foreground">{folder}</span>
+                        <span className="text-sm text-foreground">
+                          {folder}
+                        </span>
                         <button
                           onClick={() =>
                             setSelectedFolders(
-                              selectedFolders.filter((_, i) => i !== idx)
+                              selectedFolders.filter((_, i) => i !== idx),
                             )
                           }
                           className="text-destructive hover:text-destructive text-sm"
@@ -171,8 +174,8 @@ export default function Onboarding() {
                 Step 2: Select File Types
               </h2>
               <p className="text-muted-foreground mb-6">
-                Choose which file types you want to scan for duplicates. You
-                can enable or disable these types at any time.
+                Choose which file types you want to scan for duplicates. You can
+                enable or disable these types at any time.
               </p>
 
               <div className="grid grid-cols-2 gap-3">
@@ -221,9 +224,7 @@ export default function Onboarding() {
                   <button
                     key={level}
                     onClick={() =>
-                      setAiSensitivity(
-                        level as "low" | "medium" | "high"
-                      )
+                      setAiSensitivity(level as "low" | "medium" | "high")
                     }
                     className={`w-full p-6 rounded-lg border-2 transition-all text-left ${
                       aiSensitivity === level

@@ -13,7 +13,7 @@ export function useNotification() {
     (
       message: string,
       type: NotificationType = "info",
-      options: NotificationOptions = {}
+      options: NotificationOptions = {},
     ) => {
       const { duration = 4000, description } = options;
 
@@ -31,13 +31,15 @@ export function useNotification() {
           });
           break;
         case "warning":
-          toast.warning ? toast.warning(message, {
-            description,
-            duration,
-          }) : toast(message, {
-            description,
-            duration,
-          });
+          toast.warning
+            ? toast.warning(message, {
+                description,
+                duration,
+              })
+            : toast(message, {
+                description,
+                duration,
+              });
           break;
         case "info":
         default:
@@ -48,35 +50,35 @@ export function useNotification() {
           break;
       }
     },
-    []
+    [],
   );
 
   const success = useCallback(
     (message: string, options?: NotificationOptions) => {
       notify(message, "success", options);
     },
-    [notify]
+    [notify],
   );
 
   const error = useCallback(
     (message: string, options?: NotificationOptions) => {
       notify(message, "error", options);
     },
-    [notify]
+    [notify],
   );
 
   const info = useCallback(
     (message: string, options?: NotificationOptions) => {
       notify(message, "info", options);
     },
-    [notify]
+    [notify],
   );
 
   const warning = useCallback(
     (message: string, options?: NotificationOptions) => {
       notify(message, "warning", options);
     },
-    [notify]
+    [notify],
   );
 
   return {

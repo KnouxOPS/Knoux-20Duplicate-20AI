@@ -55,11 +55,9 @@ export const getFileType: RequestHandler = async (req, res) => {
     });
   } catch (error) {
     logger.error("Failed to get file type", { error });
-    res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Failed to get file type",
-      });
+    res.status(500).json({
+      error: error instanceof Error ? error.message : "Failed to get file type",
+    });
   }
 };
 

@@ -20,7 +20,9 @@ class SmartSuggest {
    * Suggest best file to keep in a duplicate group
    */
   suggestBestFile(group: DuplicateGroup): SuggestionResult {
-    logger.debug(`Analyzing group ${group.id}`, { filesCount: group.files.length });
+    logger.debug(`Analyzing group ${group.id}`, {
+      filesCount: group.files.length,
+    });
 
     const suggestions: FileSuggestion[] = group.files.map((file, index) => ({
       fileIndex: index,
@@ -55,18 +57,19 @@ class SmartSuggest {
     let score = 0;
 
     // Higher size = better quality (1-25 points)
-    const avgSize = allFiles.reduce((sum, f) => sum + f.size, 0) / allFiles.length;
+    const avgSize =
+      allFiles.reduce((sum, f) => sum + f.size, 0) / allFiles.length;
     const sizeScore = Math.min(25, (file.size / avgSize) * 25);
     score += sizeScore;
 
     // Newest file = better (1-25 points)
     const newestFile = allFiles.reduce((a, b) =>
-      a.modified > b.modified ? a : b
+      a.modified > b.modified ? a : b,
     );
     const newestScore =
       file.modified === newestFile.modified
         ? 25
-        : ((file.modified / newestFile.modified) * 25);
+        : (file.modified / newestFile.modified) * 25;
     score += newestScore;
 
     // File name preference (1-25 points)
@@ -146,10 +149,7 @@ class SmartSuggest {
     };
 
     return (
-      imageExtQuality[ext] ||
-      videoExtQuality[ext] ||
-      audioExtQuality[ext] ||
-      10
+      imageExtQuality[ext] || videoExtQuality[ext] || audioExtQuality[ext] || 10
     );
   }
 
@@ -159,13 +159,14 @@ class SmartSuggest {
   private getScoreReasons(file: FileInfo, allFiles: FileInfo[]): string[] {
     const reasons: string[] = [];
 
-    const avgSize = allFiles.reduce((sum, f) => sum + f.size, 0) / allFiles.length;
+    const avgSize =
+      allFiles.reduce((sum, f) => sum + f.size, 0) / allFiles.length;
     if (file.size > avgSize) {
       reasons.push("Larger file size");
     }
 
     const newestFile = allFiles.reduce((a, b) =>
-      a.modified > b.modified ? a : b
+      a.modified > b.modified ? a : b,
     );
     if (file.modified === newestFile.modified) {
       reasons.push("Most recent file");
@@ -176,9 +177,7 @@ class SmartSuggest {
       reasons.push("Clean filename");
     }
 
-    return reasons.length > 0
-      ? reasons
-      : ["Standard quality file"];
+    return reasons.length > 0 ? reasons : ["Standard quality file"];
   }
 }
 

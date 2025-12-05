@@ -77,7 +77,7 @@ class PreviewEngine {
    * Get file type
    */
   private getFileType(
-    extension: string
+    extension: string,
   ): "image" | "video" | "audio" | "document" | "other" {
     const ext = extension.toLowerCase();
 
@@ -91,13 +91,23 @@ class PreviewEngine {
     ) {
       return "video";
     }
-    if (["mp3", "wav", "flac", "aac", "ogg", "wma", "aiff", "alac"].includes(ext)) {
+    if (
+      ["mp3", "wav", "flac", "aac", "ogg", "wma", "aiff", "alac"].includes(ext)
+    ) {
       return "audio";
     }
     if (
-      ["pdf", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "txt", "rtf"].includes(
-        ext
-      )
+      [
+        "pdf",
+        "docx",
+        "doc",
+        "xlsx",
+        "xls",
+        "pptx",
+        "ppt",
+        "txt",
+        "rtf",
+      ].includes(ext)
     ) {
       return "document";
     }
@@ -149,16 +159,16 @@ class PreviewEngine {
     }
 
     const similarChars =
-      file1.name
-        .split("")
-        .filter((char) => file2.name.includes(char)).length /
+      file1.name.split("").filter((char) => file2.name.includes(char)).length /
       Math.max(file1.name.length, file2.name.length);
 
     if (similarChars > 0.7) {
       similarities.push("Very similar names");
     }
 
-    return similarities.length > 0 ? similarities : ["Files appear to be duplicates"];
+    return similarities.length > 0
+      ? similarities
+      : ["Files appear to be duplicates"];
   }
 
   /**
@@ -169,9 +179,7 @@ class PreviewEngine {
 
     if (file1.size !== file2.size) {
       const sizeDiff = Math.abs(file1.size - file2.size);
-      differences.push(
-        `Size difference: ${this.formatFileSize(sizeDiff)}`
-      );
+      differences.push(`Size difference: ${this.formatFileSize(sizeDiff)}`);
     }
 
     if (file1.modified !== file2.modified) {
@@ -184,9 +192,7 @@ class PreviewEngine {
       differences.push(`Different filenames`);
     }
 
-    return differences.length > 0
-      ? differences
-      : ["Files are identical"];
+    return differences.length > 0 ? differences : ["Files are identical"];
   }
 
   /**

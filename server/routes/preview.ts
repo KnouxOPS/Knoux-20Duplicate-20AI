@@ -45,8 +45,7 @@ export const compareFiles: RequestHandler = async (req, res) => {
   } catch (error) {
     logger.error("Failed to compare files", { error });
     res.status(500).json({
-      error:
-        error instanceof Error ? error.message : "Failed to compare files",
+      error: error instanceof Error ? error.message : "Failed to compare files",
     });
   }
 };
@@ -60,7 +59,7 @@ export const generateBatchPreviews: RequestHandler = async (req, res) => {
     }
 
     const previews = files.map((file: FileInfo) =>
-      previewEngine.generatePreview(file)
+      previewEngine.generatePreview(file),
     );
 
     res.json({

@@ -1,7 +1,14 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { KnouxSettings, DEFAULT_SETTINGS } from "@shared/settings";
 
-export type AppPage = "splash" | "onboarding" | "dashboard" | "scan" | "settings" | "rules" | "help";
+export type AppPage =
+  | "splash"
+  | "onboarding"
+  | "dashboard"
+  | "scan"
+  | "settings"
+  | "rules"
+  | "help";
 
 export type AppSettings = KnouxSettings;
 

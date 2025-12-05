@@ -24,12 +24,22 @@ class FileScanner {
     images: ["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg", "ico"],
     videos: ["mp4", "avi", "mkv", "mov", "flv", "wmv", "webm", "m4v"],
     audio: ["mp3", "wav", "flac", "aac", "ogg", "wma", "aiff", "alac"],
-    documents: ["pdf", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "txt", "rtf"],
+    documents: [
+      "pdf",
+      "docx",
+      "doc",
+      "xlsx",
+      "xls",
+      "pptx",
+      "ppt",
+      "txt",
+      "rtf",
+    ],
   };
 
   async scanFolder(
     folderPath: string,
-    fileTypes: string[] = []
+    fileTypes: string[] = [],
   ): Promise<ScanResult> {
     const startTime = Date.now();
     const result: ScanResult = {
@@ -57,8 +67,7 @@ class FileScanner {
 
       return result;
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : "Unknown error";
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
       result.errors.push(errorMsg);
       logger.error(`Scan failed for ${folderPath}`, { error: errorMsg });
       throw error;
@@ -66,7 +75,7 @@ class FileScanner {
   }
 
   getFileType(
-    extension: string
+    extension: string,
   ): "image" | "video" | "audio" | "document" | "other" {
     const ext = extension.toLowerCase();
 

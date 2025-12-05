@@ -23,16 +23,14 @@ export const createRule: RequestHandler = async (req, res) => {
     const { name, type, category, deletePattern } = req.body;
 
     if (!name || !type) {
-      return res
-        .status(400)
-        .json({ error: "Name and type are required" });
+      return res.status(400).json({ error: "Name and type are required" });
     }
 
     const rule = batchRules.createRule(
       name,
       type as RuleType,
       category as FileCategory,
-      deletePattern
+      deletePattern,
     );
 
     logger.info(`Rule created: ${name}`);
@@ -44,8 +42,7 @@ export const createRule: RequestHandler = async (req, res) => {
   } catch (error) {
     logger.error("Failed to create rule", { error });
     res.status(500).json({
-      error:
-        error instanceof Error ? error.message : "Failed to create rule",
+      error: error instanceof Error ? error.message : "Failed to create rule",
     });
   }
 };
@@ -70,8 +67,7 @@ export const updateRule: RequestHandler = async (req, res) => {
   } catch (error) {
     logger.error("Failed to update rule", { error });
     res.status(500).json({
-      error:
-        error instanceof Error ? error.message : "Failed to update rule",
+      error: error instanceof Error ? error.message : "Failed to update rule",
     });
   }
 };
@@ -95,8 +91,7 @@ export const deleteRule: RequestHandler = async (req, res) => {
   } catch (error) {
     logger.error("Failed to delete rule", { error });
     res.status(500).json({
-      error:
-        error instanceof Error ? error.message : "Failed to delete rule",
+      error: error instanceof Error ? error.message : "Failed to delete rule",
     });
   }
 };
@@ -120,8 +115,7 @@ export const toggleRule: RequestHandler = async (req, res) => {
   } catch (error) {
     logger.error("Failed to toggle rule", { error });
     res.status(500).json({
-      error:
-        error instanceof Error ? error.message : "Failed to toggle rule",
+      error: error instanceof Error ? error.message : "Failed to toggle rule",
     });
   }
 };

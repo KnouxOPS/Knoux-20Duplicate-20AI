@@ -44,19 +44,17 @@ export default function ScanPage() {
 
   const [scanning, setScanning] = useState(false);
   const [groups, setGroups] = useState<DuplicateGroup[]>(
-    generateMockDuplicates()
+    generateMockDuplicates(),
   );
   const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(
-    new Set()
+    new Set(),
   );
   const [previewFile, setPreviewFile] = useState<DuplicateFile | null>(null);
 
   // Toggle group expansion
   const toggleGroup = useCallback((groupId: string) => {
     setGroups((prev) =>
-      prev.map((g) =>
-        g.id === groupId ? { ...g, expanded: !g.expanded } : g
-      )
+      prev.map((g) => (g.id === groupId ? { ...g, expanded: !g.expanded } : g)),
     );
   }, []);
 
@@ -74,25 +72,28 @@ export default function ScanPage() {
   }, []);
 
   // Keep file and deselect others in group
-  const keepFile = useCallback((groupId: string, fileIndex: number) => {
-    const group = groups.find((g) => g.id === groupId);
-    if (!group) return;
+  const keepFile = useCallback(
+    (groupId: string, fileIndex: number) => {
+      const group = groups.find((g) => g.id === groupId);
+      if (!group) return;
 
-    const newSelectedSet = new Set(selectedForDelete);
+      const newSelectedSet = new Set(selectedForDelete);
 
-    // Deselect the kept file
-    newSelectedSet.delete(group.files[fileIndex].id);
+      // Deselect the kept file
+      newSelectedSet.delete(group.files[fileIndex].id);
 
-    // Select all other files for deletion
-    group.files.forEach((file, idx) => {
-      if (idx !== fileIndex) {
-        newSelectedSet.add(file.id);
-      }
-    });
+      // Select all other files for deletion
+      group.files.forEach((file, idx) => {
+        if (idx !== fileIndex) {
+          newSelectedSet.add(file.id);
+        }
+      });
 
-    setSelectedForDelete(newSelectedSet);
-    success(`${group.files[fileIndex].name} marked to keep`);
-  }, [groups, selectedForDelete, success]);
+      setSelectedForDelete(newSelectedSet);
+      success(`${group.files[fileIndex].name} marked to keep`);
+    },
+    [groups, selectedForDelete, success],
+  );
 
   // Delete selected files
   const handleDeleteFiles = useCallback(async () => {
@@ -115,17 +116,14 @@ export default function ScanPage() {
             ...group,
             files: group.files.filter((f) => !filesToDelete.includes(f.id)),
           }))
-          .filter((group) => group.files.length > 0)
+          .filter((group) => group.files.length > 0),
       );
 
       setSelectedForDelete(new Set());
 
-      success(
-        `Successfully moved ${filesToDelete.length} files to trash`,
-        {
-          description: "You can restore them from the trash if needed",
-        }
-      );
+      success(`Successfully moved ${filesToDelete.length} files to trash`, {
+        description: "You can restore them from the trash if needed",
+      });
     } catch (err) {
       notifyError("Failed to delete files");
     } finally {
@@ -155,7 +153,10 @@ export default function ScanPage() {
   }, [success, notifyError, info]);
 
   const totalSize = groups.reduce((sum, g) => sum + g.totalSize, 0);
-  const totalRecoverable = groups.reduce((sum, g) => sum + g.recoverableSize, 0);
+  const totalRecoverable = groups.reduce(
+    (sum, g) => sum + g.recoverableSize,
+    0,
+  );
   const totalFiles = groups.reduce((sum, g) => sum + g.fileCount, 0);
 
   const getFileColor = (type: string) => {
@@ -236,9 +237,7 @@ export default function ScanPage() {
               </p>
             </div>
             <div className="bg-secondary/20 rounded-lg p-4">
-              <p className="text-xs text-muted-foreground mb-1">
-                Can Recover
-              </p>
+              <p className="text-xs text-muted-foreground mb-1">Can Recover</p>
               <p className="text-2xl font-bold text-secondary">
                 {formatFileSize(totalRecoverable)}
               </p>
@@ -282,7 +281,8 @@ export default function ScanPage() {
                       <div className="text-2xl">{getTypeEmoji(group.type)}</div>
                       <div className="text-left">
                         <p className="font-semibold text-foreground">
-                          {group.type.charAt(0).toUpperCase() + group.type.slice(1)}{" "}
+                          {group.type.charAt(0).toUpperCase() +
+                            group.type.slice(1)}{" "}
                           Duplicates
                         </p>
                         <p className="text-sm text-muted-foreground">
@@ -444,17 +444,13 @@ export default function ScanPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Created
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-1">Created</p>
                   <p className="font-semibold text-foreground">
                     {new Date(previewFile.created).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    Modified
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-1">Modified</p>
                   <p className="font-semibold text-foreground">
                     {new Date(previewFile.modified).toLocaleDateString()}
                   </p>

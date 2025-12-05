@@ -2,7 +2,12 @@ import { logger } from "./logger";
 import { FileInfo } from "./scanner";
 import { DuplicateGroup } from "./duplicateEngine";
 
-export type RuleType = "keep_largest" | "keep_newest" | "keep_smallest" | "keep_best_quality" | "delete_pattern";
+export type RuleType =
+  | "keep_largest"
+  | "keep_newest"
+  | "keep_smallest"
+  | "keep_best_quality"
+  | "delete_pattern";
 export type FileCategory = "image" | "video" | "document" | "audio" | "all";
 
 export interface BatchRule {
@@ -34,7 +39,7 @@ class BatchRules {
     name: string,
     type: RuleType,
     category: FileCategory = "all",
-    deletePattern?: string
+    deletePattern?: string,
   ): BatchRule {
     const rule: BatchRule = {
       id: `rule-${this.ruleCounter++}`,
@@ -127,16 +132,13 @@ class BatchRules {
   applyRulesToGroups(groups: DuplicateGroup[]): RuleApplication[] {
     const applications: RuleApplication[] = [];
     const enabledRules = Array.from(this.rules.values()).filter(
-      (r) => r.enabled
+      (r) => r.enabled,
     );
 
     for (const group of groups) {
       for (const rule of enabledRules) {
         // Skip if rule doesn't apply to this file type
-        if (
-          rule.category !== "all" &&
-          group.type !== rule.category
-        ) {
+        if (rule.category !== "all" && group.type !== rule.category) {
           continue;
         }
 
@@ -144,13 +146,10 @@ class BatchRules {
 
         if (application.filesToDelete.length > 0) {
           applications.push(application);
-          logger.info(
-            `Rule applied to group ${group.id}: ${rule.name}`,
-            {
-              ruleId: rule.id,
-              filesToDelete: application.filesToDelete.length,
-            }
-          );
+          logger.info(`Rule applied to group ${group.id}: ${rule.name}`, {
+            ruleId: rule.id,
+            filesToDelete: application.filesToDelete.length,
+          });
         }
       }
     }
@@ -161,16 +160,17 @@ class BatchRules {
   /**
    * Apply a single rule to a group
    */
-  private applyRuleToGroup(rule: BatchRule, group: DuplicateGroup): RuleApplication {
+  private applyRuleToGroup(
+    rule: BatchRule,
+    group: DuplicateGroup,
+  ): RuleApplication {
     let filesToKeep: FileInfo[] = [];
     let filesToDelete: FileInfo[] = [];
     let reason = "";
 
     switch (rule.type) {
       case "keep_largest":
-        const largest = group.files.reduce((a, b) =>
-          a.size > b.size ? a : b
-        );
+        const largest = group.files.reduce((a, b) => (a.size > b.size ? a : b));
         filesToKeep = [largest];
         filesToDelete = group.files.filter((f) => f.path !== largest.path);
         reason = `Keep largest file: ${largest.name}`;
@@ -178,7 +178,7 @@ class BatchRules {
 
       case "keep_newest":
         const newest = group.files.reduce((a, b) =>
-          a.modified > b.modified ? a : b
+          a.modified > b.modified ? a : b,
         );
         filesToKeep = [newest];
         filesToDelete = group.files.filter((f) => f.path !== newest.path);
@@ -187,7 +187,7 @@ class BatchRules {
 
       case "keep_smallest":
         const smallest = group.files.reduce((a, b) =>
-          a.size < b.size ? a : b
+          a.size < b.size ? a : b,
         );
         filesToKeep = [smallest];
         filesToDelete = group.files.filter((f) => f.path !== smallest.path);
@@ -196,9 +196,7 @@ class BatchRules {
 
       case "keep_best_quality":
         // For simplicity, treat as keep_largest
-        const best = group.files.reduce((a, b) =>
-          a.size > b.size ? a : b
-        );
+        const best = group.files.reduce((a, b) => (a.size > b.size ? a : b));
         filesToKeep = [best];
         filesToDelete = group.files.filter((f) => f.path !== best.path);
         reason = `Keep best quality file: ${best.name}`;

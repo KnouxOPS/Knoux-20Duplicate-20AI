@@ -40,7 +40,7 @@ class DuplicateEngine {
    */
   detectDuplicates(
     files: FileInfo[],
-    sensitivity: "low" | "medium" | "high" = "high"
+    sensitivity: "low" | "medium" | "high" = "high",
   ): DuplicateAnalysis {
     logger.info("Starting duplicate detection", {
       filesCount: files.length,
@@ -70,7 +70,8 @@ class DuplicateEngine {
     for (const [hash, fileGroup] of groupMap.entries()) {
       if (fileGroup.length > 1) {
         const totalSize = fileGroup.reduce((sum, f) => sum + f.size, 0);
-        const recoverableSize = totalSize - Math.min(...fileGroup.map((f) => f.size));
+        const recoverableSize =
+          totalSize - Math.min(...fileGroup.map((f) => f.size));
 
         const group: DuplicateGroup = {
           id: `group-${groupId++}`,
@@ -101,7 +102,7 @@ class DuplicateEngine {
    */
   private calculateSimilarity(
     files: FileInfo[],
-    sensitivity: "low" | "medium" | "high"
+    sensitivity: "low" | "medium" | "high",
   ): number {
     if (files.length < 2) return 1;
 
@@ -112,8 +113,7 @@ class DuplicateEngine {
     // Adjust based on name similarity
     const names = files.map((f) => f.name);
     const commonChars = this.countCommonChars(names);
-    const nameScore =
-      commonChars / Math.max(...names.map((n) => n.length));
+    const nameScore = commonChars / Math.max(...names.map((n) => n.length));
 
     return Math.min(1, baseScore + nameScore * 0.1);
   }

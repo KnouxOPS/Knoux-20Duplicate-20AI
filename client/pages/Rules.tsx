@@ -96,17 +96,18 @@ export default function RulesPage() {
     success(`Rule "${rule.name}" created`);
   }, [newRule, success, info]);
 
-  const handleDeleteRule = useCallback((ruleId: string) => {
-    const rule = rules.find((r) => r.id === ruleId);
-    setRules((prev) => prev.filter((r) => r.id !== ruleId));
-    success(`Rule "${rule?.name}" deleted`);
-  }, [rules, success]);
+  const handleDeleteRule = useCallback(
+    (ruleId: string) => {
+      const rule = rules.find((r) => r.id === ruleId);
+      setRules((prev) => prev.filter((r) => r.id !== ruleId));
+      success(`Rule "${rule?.name}" deleted`);
+    },
+    [rules, success],
+  );
 
   const handleToggleRule = useCallback((ruleId: string) => {
     setRules((prev) =>
-      prev.map((r) =>
-        r.id === ruleId ? { ...r, enabled: !r.enabled } : r
-      )
+      prev.map((r) => (r.id === ruleId ? { ...r, enabled: !r.enabled } : r)),
     );
   }, []);
 
@@ -122,7 +123,7 @@ export default function RulesPage() {
       {
         description:
           "The selected rules will be applied to your duplicate files",
-      }
+      },
     );
   }, [rules, success, info]);
 
@@ -140,10 +141,7 @@ export default function RulesPage() {
             </p>
           </div>
 
-          <Button
-            onClick={() => setCurrentPage("dashboard")}
-            variant="outline"
-          >
+          <Button onClick={() => setCurrentPage("dashboard")} variant="outline">
             Back
           </Button>
         </div>
@@ -164,7 +162,9 @@ export default function RulesPage() {
           {/* New Rule Form */}
           {showNewRuleForm && (
             <div className="bg-card border border-border rounded-lg p-6 space-y-4 animate-fade-in-up">
-              <h2 className="text-lg font-bold text-foreground">Create New Rule</h2>
+              <h2 className="text-lg font-bold text-foreground">
+                Create New Rule
+              </h2>
 
               <div>
                 <label className="block text-sm font-medium text-foreground mb-2">
@@ -291,9 +291,7 @@ export default function RulesPage() {
               >
                 <button
                   onClick={() =>
-                    setExpandedRule(
-                      expandedRule === rule.id ? null : rule.id
-                    )
+                    setExpandedRule(expandedRule === rule.id ? null : rule.id)
                   }
                   className="w-full px-6 py-4 hover:bg-muted transition-colors flex items-center justify-between"
                 >
@@ -402,7 +400,10 @@ export default function RulesPage() {
       {rules.filter((r) => r.enabled).length > 0 && (
         <div className="border-t border-border bg-card p-6">
           <div className="max-w-5xl mx-auto flex justify-end gap-3">
-            <Button onClick={() => setCurrentPage("dashboard")} variant="outline">
+            <Button
+              onClick={() => setCurrentPage("dashboard")}
+              variant="outline"
+            >
               Cancel
             </Button>
             <Button

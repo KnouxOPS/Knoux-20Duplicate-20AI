@@ -90,7 +90,9 @@ export default function Dashboard() {
                 title={sidebarOpen ? "" : item.label}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
-                {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+                {sidebarOpen && (
+                  <span className="text-sm font-medium">{item.label}</span>
+                )}
               </button>
             );
           })}
@@ -301,7 +303,8 @@ export default function Dashboard() {
                         AI Smart Detection
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Uses advanced AI to find true duplicates, not just by name
+                        Uses advanced AI to find true duplicates, not just by
+                        name
                       </p>
                     </div>
                   </div>

@@ -18,7 +18,7 @@ export default function SettingsPage() {
   const { success } = useNotification();
 
   const [expandedSection, setExpandedSection] = useState<string | null>(
-    "general"
+    "general",
   );
   const [localSettings, setLocalSettings] = useState({ ...settings });
   const [newFolder, setNewFolder] = useState("");
@@ -275,7 +275,10 @@ export default function SettingsPage() {
         <div className="space-y-6">
           <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p className="text-sm text-amber-900 dark:text-amber-300">
-              Current theme: <span className="font-semibold">{isDarkMode ? "Dark Mode" : "Light Mode"}</span>
+              Current theme:{" "}
+              <span className="font-semibold">
+                {isDarkMode ? "Dark Mode" : "Light Mode"}
+              </span>
             </p>
             <p className="text-xs text-amber-800 dark:text-amber-400 mt-1">
               Use the toggle in the sidebar to switch themes
@@ -390,10 +393,7 @@ export default function SettingsPage() {
             </p>
           </div>
 
-          <Button
-            onClick={() => setCurrentPage("dashboard")}
-            variant="outline"
-          >
+          <Button onClick={() => setCurrentPage("dashboard")} variant="outline">
             Back
           </Button>
         </div>
