@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 
 export type NotificationType = "success" | "error" | "info" | "warning";
 

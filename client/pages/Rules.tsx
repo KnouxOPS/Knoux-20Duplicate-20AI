@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useApp } from "@/context/AppContext";
 import { useNotification } from "@/hooks/useNotification";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, Toggle2, ChevronDown, ChevronUp } from "lucide-react";
+import { Plus, Trash2, ToggleLeft, ChevronDown, ChevronUp } from "lucide-react";
 
 interface Rule {
   id: string;
@@ -325,7 +325,7 @@ export default function RulesPage() {
                       }`}
                       title={rule.enabled ? "Disable rule" : "Enable rule"}
                     >
-                      <Toggle2 className="w-5 h-5" />
+                      <ToggleLeft className="w-5 h-5" />
                     </button>
 
                     {expandedRule === rule.id ? (
