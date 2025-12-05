@@ -99,6 +99,14 @@ Knoux Duplicate AI helps users:
 - Fixed TypeScript type narrowing in Rules.tsx
 - Set up deployment configuration
 - Installed all dependencies via PNPM
+- Added shared types and utilities to `shared/api.ts`:
+  - `FileType` type definition
+  - `File` interface for duplicate detection
+  - `FILE_ICONS` mapping for visual representation
+  - `FILE_EXTENSIONS` by category
+  - `detectFileType()` utility function
+  - `formatFileSize()` utility function
+  - `ScanResult`, `DuplicateGroup`, `TrashEntry`, `BatchRule` interfaces
 - Verified application runs successfully
 
 ## Status
