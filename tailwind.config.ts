@@ -57,6 +57,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        file: {
+          image: "#FFD700",
+          video: "#4169E1",
+          document: "#32CD32",
+          audio: "#FF8C00",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
