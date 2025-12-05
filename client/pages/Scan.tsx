@@ -1,12 +1,626 @@
-import Placeholder from "./Placeholder";
-import { Scan } from "lucide-react";
+import { useState, useCallback } from "react";
+import { useApp } from "@/context/AppContext";
+import { useNotification } from "@/hooks/useNotification";
+import { Button } from "@/components/ui/button";
+import {
+  ChevronDown,
+  ChevronUp,
+  Trash2,
+  Eye,
+  CheckCircle,
+  HardDrive,
+  AlertCircle,
+} from "lucide-react";
+
+interface DuplicateFile {
+  id: string;
+  name: string;
+  path: string;
+  size: number;
+  sizeFormatted: string;
+  type: "image" | "video" | "audio" | "document" | "other";
+  created: number;
+  modified: number;
+  thumbnail?: string;
+  isSelected: boolean;
+}
+
+interface DuplicateGroup {
+  id: string;
+  type: string;
+  fileCount: number;
+  totalSize: number;
+  totalSizeFormatted: string;
+  recoverableSize: number;
+  recoverableSizeFormatted: string;
+  files: DuplicateFile[];
+  expanded: boolean;
+  bestFileIndex: number;
+}
 
 export default function ScanPage() {
-  return (
-    <Placeholder
-      title="Scan Results"
-      description="This page will show your scan results with smart groups of duplicate files, preview options, and bulk actions."
-      icon={<Scan className="w-20 h-20 text-primary" />}
-    />
+  const { setCurrentPage } = useApp();
+  const { success, error: notifyError, info } = useNotification();
+
+  const [scanning, setScanning] = useState(false);
+  const [groups, setGroups] = useState<DuplicateGroup[]>(
+    generateMockDuplicates()
   );
+  const [selectedForDelete, setSelectedForDelete] = useState<Set<string>>(
+    new Set()
+  );
+  const [previewFile, setPreviewFile] = useState<DuplicateFile | null>(null);
+
+  // Toggle group expansion
+  const toggleGroup = useCallback((groupId: string) => {
+    setGroups((prev) =>
+      prev.map((g) =>
+        g.id === groupId ? { ...g, expanded: !g.expanded } : g
+      )
+    );
+  }, []);
+
+  // Toggle file selection
+  const toggleFileSelection = useCallback((fileId: string) => {
+    setSelectedForDelete((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
+      } else {
+        newSet.add(fileId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  // Keep file and deselect others in group
+  const keepFile = useCallback((groupId: string, fileIndex: number) => {
+    const group = groups.find((g) => g.id === groupId);
+    if (!group) return;
+
+    const newSelectedSet = new Set(selectedForDelete);
+
+    // Deselect the kept file
+    newSelectedSet.delete(group.files[fileIndex].id);
+
+    // Select all other files for deletion
+    group.files.forEach((file, idx) => {
+      if (idx !== fileIndex) {
+        newSelectedSet.add(file.id);
+      }
+    });
+
+    setSelectedForDelete(newSelectedSet);
+    success(`${group.files[fileIndex].name} marked to keep`);
+  }, [groups, selectedForDelete, success]);
+
+  // Delete selected files
+  const handleDeleteFiles = useCallback(async () => {
+    if (selectedForDelete.size === 0) {
+      notifyError("No files selected for deletion");
+      return;
+    }
+
+    try {
+      setScanning(true);
+
+      // In a real app, this would call the API
+      // For now, simulate the deletion
+      const filesToDelete = Array.from(selectedForDelete);
+
+      // Update groups to remove deleted files
+      setGroups((prev) =>
+        prev
+          .map((group) => ({
+            ...group,
+            files: group.files.filter((f) => !filesToDelete.includes(f.id)),
+          }))
+          .filter((group) => group.files.length > 0)
+      );
+
+      setSelectedForDelete(new Set());
+
+      success(
+        `Successfully moved ${filesToDelete.length} files to trash`,
+        {
+          description: "You can restore them from the trash if needed",
+        }
+      );
+    } catch (err) {
+      notifyError("Failed to delete files");
+    } finally {
+      setScanning(false);
+    }
+  }, [selectedForDelete, success, notifyError]);
+
+  // Start new scan
+  const handleStartScan = useCallback(async () => {
+    try {
+      setScanning(true);
+      info("Starting duplicate scan...");
+
+      // Simulate scan
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const newGroups = generateMockDuplicates();
+      setGroups(newGroups);
+      setSelectedForDelete(new Set());
+
+      success(`Scan completed! Found ${newGroups.length} duplicate groups`);
+    } catch (err) {
+      notifyError("Scan failed");
+    } finally {
+      setScanning(false);
+    }
+  }, [success, notifyError, info]);
+
+  const totalSize = groups.reduce((sum, g) => sum + g.totalSize, 0);
+  const totalRecoverable = groups.reduce((sum, g) => sum + g.recoverableSize, 0);
+  const totalFiles = groups.reduce((sum, g) => sum + g.fileCount, 0);
+
+  const getFileColor = (type: string) => {
+    switch (type) {
+      case "image":
+        return "bg-file-image";
+      case "video":
+        return "bg-file-video";
+      case "document":
+        return "bg-file-document";
+      case "audio":
+        return "bg-file-audio";
+      default:
+        return "bg-muted";
+    }
+  };
+
+  const getTypeEmoji = (type: string) => {
+    switch (type) {
+      case "image":
+        return "🖼️";
+      case "video":
+        return "🎬";
+      case "document":
+        return "📄";
+      case "audio":
+        return "🎵";
+      default:
+        return "📁";
+    }
+  };
+
+  return (
+    <div className="h-screen w-full bg-background dark:bg-slate-900 flex flex-col">
+      {/* Header */}
+      <div className="border-b border-border bg-card p-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">
+                Scan Results
+              </h1>
+              <p className="text-muted-foreground mt-1">
+                Found {groups.length} duplicate groups with{" "}
+                {formatFileSize(totalRecoverable)} of recoverable space
+              </p>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                onClick={() => setCurrentPage("dashboard")}
+                variant="outline"
+              >
+                Back
+              </Button>
+              <Button
+                onClick={handleStartScan}
+                disabled={scanning}
+                className="bg-primary hover:bg-primary/90 text-white"
+              >
+                {scanning ? "Scanning..." : "New Scan"}
+              </Button>
+            </div>
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-3 gap-4">
+            <div className="bg-muted rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Total Duplicates
+              </p>
+              <p className="text-2xl font-bold text-foreground">{totalFiles}</p>
+            </div>
+            <div className="bg-muted rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">Total Size</p>
+              <p className="text-2xl font-bold text-foreground">
+                {formatFileSize(totalSize)}
+              </p>
+            </div>
+            <div className="bg-secondary/20 rounded-lg p-4">
+              <p className="text-xs text-muted-foreground mb-1">
+                Can Recover
+              </p>
+              <p className="text-2xl font-bold text-secondary">
+                {formatFileSize(totalRecoverable)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 overflow-auto">
+        <div className="max-w-7xl mx-auto p-6 space-y-4">
+          {groups.length === 0 ? (
+            <div className="bg-card border border-border rounded-lg p-12 text-center">
+              <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                No Duplicates Found
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Your system is clean! No duplicate files detected.
+              </p>
+              <Button
+                onClick={handleStartScan}
+                className="bg-primary hover:bg-primary/90 text-white"
+              >
+                Run New Scan
+              </Button>
+            </div>
+          ) : (
+            <>
+              {groups.map((group) => (
+                <div
+                  key={group.id}
+                  className="bg-card border border-border rounded-lg overflow-hidden animate-fade-in-up"
+                >
+                  {/* Group Header */}
+                  <button
+                    onClick={() => toggleGroup(group.id)}
+                    className="w-full px-6 py-4 hover:bg-muted transition-colors flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="text-2xl">{getTypeEmoji(group.type)}</div>
+                      <div className="text-left">
+                        <p className="font-semibold text-foreground">
+                          {group.type.charAt(0).toUpperCase() + group.type.slice(1)}{" "}
+                          Duplicates
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {group.fileCount} files • {group.totalSizeFormatted}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <p className="text-sm font-medium text-secondary">
+                          {group.recoverableSizeFormatted}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          recoverable
+                        </p>
+                      </div>
+
+                      {group.expanded ? (
+                        <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Group Content */}
+                  {group.expanded && (
+                    <div className="border-t border-border px-6 py-4 bg-muted/30 space-y-3">
+                      {group.files.map((file, idx) => (
+                        <div
+                          key={file.id}
+                          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                            selectedForDelete.has(file.id)
+                              ? "bg-destructive/10 border border-destructive"
+                              : "bg-background border border-border hover:border-primary"
+                          }`}
+                        >
+                          {/* Checkbox */}
+                          <input
+                            type="checkbox"
+                            checked={selectedForDelete.has(file.id)}
+                            onChange={() => toggleFileSelection(file.id)}
+                            className="w-5 h-5 rounded cursor-pointer"
+                          />
+
+                          {/* File Info */}
+                          <div className="flex-1">
+                            <p className="font-medium text-foreground text-sm">
+                              {idx === group.bestFileIndex && (
+                                <span className="inline-block bg-primary text-white text-xs px-2 py-0.5 rounded mr-2">
+                                  Best
+                                </span>
+                              )}
+                              {file.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {file.sizeFormatted} • Modified:{" "}
+                              {new Date(file.modified).toLocaleDateString()}
+                            </p>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setPreviewFile(file)}
+                              className="h-8 w-8 p-0"
+                              title="Preview file"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+
+                            {idx !== group.bestFileIndex && (
+                              <Button
+                                size="sm"
+                                onClick={() => keepFile(group.id, idx)}
+                                className="h-8 px-2 text-xs"
+                                variant="outline"
+                                title="Keep this file"
+                              >
+                                Keep
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Action Footer */}
+              {groups.length > 0 && (
+                <div className="sticky bottom-0 bg-card border-t border-border p-6 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-foreground">
+                      <span className="font-semibold">
+                        {selectedForDelete.size}
+                      </span>{" "}
+                      files selected for deletion
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      These files will be moved to the safe trash
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={handleDeleteFiles}
+                    disabled={selectedForDelete.size === 0 || scanning}
+                    className="bg-destructive hover:bg-destructive/90 text-white flex items-center gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Selected Files
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Preview Panel */}
+      {previewFile && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card rounded-lg p-6 max-w-2xl w-full max-h-96 overflow-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-foreground">
+                File Preview
+              </h2>
+              <button
+                onClick={() => setPreviewFile(null)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Filename</p>
+                <p className="font-mono text-sm text-foreground">
+                  {previewFile.name}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Size</p>
+                  <p className="font-semibold text-foreground">
+                    {previewFile.sizeFormatted}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Type</p>
+                  <p className="font-semibold text-foreground capitalize">
+                    {previewFile.type}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Created
+                  </p>
+                  <p className="font-semibold text-foreground">
+                    {new Date(previewFile.created).toLocaleDateString()}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Modified
+                  </p>
+                  <p className="font-semibold text-foreground">
+                    {new Date(previewFile.modified).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Path</p>
+                <p className="font-mono text-xs text-muted-foreground break-all">
+                  {previewFile.path}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button
+                onClick={() => setPreviewFile(null)}
+                variant="outline"
+                className="flex-1"
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  toggleFileSelection(previewFile.id);
+                  setPreviewFile(null);
+                }}
+                className="flex-1 bg-primary hover:bg-primary/90 text-white"
+              >
+                {selectedForDelete.has(previewFile.id)
+                  ? "Keep This File"
+                  : "Delete This File"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function generateMockDuplicates(): DuplicateGroup[] {
+  return [
+    {
+      id: "group-1",
+      type: "image",
+      fileCount: 3,
+      totalSize: 15728640,
+      totalSizeFormatted: "15 MB",
+      recoverableSize: 10485760,
+      recoverableSizeFormatted: "10 MB",
+      expanded: false,
+      bestFileIndex: 0,
+      files: [
+        {
+          id: "file-1-1",
+          name: "vacation_2024.jpg",
+          path: "C:\\Users\\Documents\\Photos\\vacation_2024.jpg",
+          size: 5242880,
+          sizeFormatted: "5 MB",
+          type: "image",
+          created: Date.now() - 7 * 24 * 60 * 60 * 1000,
+          modified: Date.now() - 7 * 24 * 60 * 60 * 1000,
+          isSelected: false,
+        },
+        {
+          id: "file-1-2",
+          name: "vacation_2024 (1).jpg",
+          path: "C:\\Users\\Desktop\\vacation_2024 (1).jpg",
+          size: 5242880,
+          sizeFormatted: "5 MB",
+          type: "image",
+          created: Date.now() - 10 * 24 * 60 * 60 * 1000,
+          modified: Date.now() - 10 * 24 * 60 * 60 * 1000,
+          isSelected: false,
+        },
+        {
+          id: "file-1-3",
+          name: "vacation_2024_copy.jpg",
+          path: "C:\\Users\\Downloads\\vacation_2024_copy.jpg",
+          size: 5242880,
+          sizeFormatted: "5 MB",
+          type: "image",
+          created: Date.now() - 20 * 24 * 60 * 60 * 1000,
+          modified: Date.now() - 20 * 24 * 60 * 60 * 1000,
+          isSelected: false,
+        },
+      ],
+    },
+    {
+      id: "group-2",
+      type: "document",
+      fileCount: 2,
+      totalSize: 2097152,
+      totalSizeFormatted: "2 MB",
+      recoverableSize: 1048576,
+      recoverableSizeFormatted: "1 MB",
+      expanded: false,
+      bestFileIndex: 0,
+      files: [
+        {
+          id: "file-2-1",
+          name: "report_final.pdf",
+          path: "C:\\Users\\Documents\\report_final.pdf",
+          size: 1048576,
+          sizeFormatted: "1 MB",
+          type: "document",
+          created: Date.now() - 3 * 24 * 60 * 60 * 1000,
+          modified: Date.now() - 3 * 24 * 60 * 60 * 1000,
+          isSelected: false,
+        },
+        {
+          id: "file-2-2",
+          name: "report_final (1).pdf",
+          path: "C:\\Users\\Desktop\\report_final (1).pdf",
+          size: 1048576,
+          sizeFormatted: "1 MB",
+          type: "document",
+          created: Date.now() - 5 * 24 * 60 * 60 * 1000,
+          modified: Date.now() - 5 * 24 * 60 * 60 * 1000,
+          isSelected: false,
+        },
+      ],
+    },
+    {
+      id: "group-3",
+      type: "video",
+      fileCount: 2,
+      totalSize: 3145728,
+      totalSizeFormatted: "3 MB",
+      recoverableSize: 1572864,
+      recoverableSizeFormatted: "1.5 MB",
+      expanded: false,
+      bestFileIndex: 0,
+      files: [
+        {
+          id: "file-3-1",
+          name: "birthday_party.mp4",
+          path: "C:\\Users\\Videos\\birthday_party.mp4",
+          size: 1572864,
+          sizeFormatted: "1.5 MB",
+          type: "video",
+          created: Date.now() - 2 * 24 * 60 * 60 * 1000,
+          modified: Date.now() - 2 * 24 * 60 * 60 * 1000,
+          isSelected: false,
+        },
+        {
+          id: "file-3-2",
+          name: "birthday_party_backup.mp4",
+          path: "C:\\Users\\Documents\\Backups\\birthday_party_backup.mp4",
+          size: 1572864,
+          sizeFormatted: "1.5 MB",
+          type: "video",
+          created: Date.now() - 30 * 24 * 60 * 60 * 1000,
+          modified: Date.now() - 30 * 24 * 60 * 60 * 1000,
+          isSelected: false,
+        },
+      ],
+    },
+  ];
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes === 0) return "0 Bytes";
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
 }
