@@ -11,6 +11,8 @@ export default function Onboarding() {
     updateSettings,
     settings,
     setHasCompletedOnboarding,
+    t,
+    isRTL,
   } = useApp();
   const [step, setStep] = useState<OnboardingStep>("folders");
   const [selectedFolders, setSelectedFolders] = useState<string[]>(
@@ -22,13 +24,13 @@ export default function Onboarding() {
   const [aiSensitivity, setAiSensitivity] = useState(settings.aiSensitivity);
 
   const fileTypeOptions = [
-    { id: "jpg", label: "JPG Images", color: "bg-yellow-400" },
-    { id: "png", label: "PNG Images", color: "bg-yellow-400" },
-    { id: "mp4", label: "MP4 Videos", color: "bg-blue-500" },
-    { id: "mp3", label: "MP3 Audio", color: "bg-orange-500" },
-    { id: "pdf", label: "PDF Documents", color: "bg-green-500" },
-    { id: "docx", label: "Word Documents", color: "bg-green-500" },
-    { id: "xlsx", label: "Excel Files", color: "bg-green-500" },
+    { id: "jpg", label: isRTL ? "صور JPG" : "JPG Images", color: "bg-yellow-400" },
+    { id: "png", label: isRTL ? "صور PNG" : "PNG Images", color: "bg-yellow-400" },
+    { id: "mp4", label: isRTL ? "فيديو MP4" : "MP4 Videos", color: "bg-blue-500" },
+    { id: "mp3", label: isRTL ? "صوت MP3" : "MP3 Audio", color: "bg-orange-500" },
+    { id: "pdf", label: isRTL ? "مستندات PDF" : "PDF Documents", color: "bg-green-500" },
+    { id: "docx", label: isRTL ? "مستندات Word" : "Word Documents", color: "bg-green-500" },
+    { id: "xlsx", label: isRTL ? "ملفات Excel" : "Excel Files", color: "bg-green-500" },
   ];
 
   const toggleFileType = (id: string) => {
@@ -43,13 +45,13 @@ export default function Onboarding() {
     } else if (step === "filetypes") {
       setStep("ai");
     } else if (step === "ai") {
-      // Complete onboarding
       updateSettings({
         scanPaths: selectedFolders,
         fileTypes: selectedFileTypes,
         aiSensitivity: aiSensitivity,
       });
       setHasCompletedOnboarding(true);
+      localStorage.setItem("knoux_onboarding_completed", "true");
       setCurrentPage("dashboard");
     }
   };
@@ -72,21 +74,21 @@ export default function Onboarding() {
     <div className="min-h-screen w-full bg-gradient-to-br from-background to-muted dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
       <div className="border-b border-border bg-card">
-        <div className="max-w-2xl mx-auto px-6 py-8">
+        <div className={`max-w-2xl mx-auto px-6 py-8 ${isRTL ? "text-right" : ""}`}>
           <h1 className="text-3xl font-bold text-foreground mb-2">
-            Welcome to Knoux
+            {isRTL ? "مرحبًا بك في Knoux" : "Welcome to Knoux"}
           </h1>
           <p className="text-muted-foreground">
-            Let's get you started in just 3 simple steps
+            {isRTL ? "لنبدأ معك في 3 خطوات بسيطة" : "Let's get you started in just 3 simple steps"}
           </p>
         </div>
       </div>
 
       {/* Progress Indicator */}
       <div className="max-w-2xl mx-auto px-6 py-8">
-        <div className="flex justify-between mb-8">
+        <div className={`flex justify-between mb-8 ${isRTL ? "flex-row-reverse" : ""}`}>
           {[1, 2, 3].map((num) => (
-            <div key={num} className="flex items-center flex-1">
+            <div key={num} className={`flex items-center flex-1 ${isRTL ? "flex-row-reverse" : ""}`}>
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
                   num <= getStepNumber()
@@ -110,29 +112,31 @@ export default function Onboarding() {
 
       {/* Content */}
       <div className="max-w-2xl mx-auto px-6 pb-16">
-        <div className="bg-card rounded-lg border border-border p-8 animate-fade-in-up">
+        <div className={`bg-card rounded-lg border border-border p-8 animate-fade-in-up ${isRTL ? "text-right" : ""}`}>
           {step === "folders" && (
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-4">
-                Step 1: Select Folders to Scan
+                {isRTL ? "الخطوة 1: اختر المجلدات للفحص" : "Step 1: Select Folders to Scan"}
               </h2>
               <p className="text-muted-foreground mb-6">
-                Choose which folders you want to scan for duplicate files. You
-                can add more folders later in settings.
+                {isRTL 
+                  ? "اختر المجلدات التي تريد فحصها للبحث عن الملفات المكررة. يمكنك إضافة المزيد من المجلدات لاحقًا في الإعدادات."
+                  : "Choose which folders you want to scan for duplicate files. You can add more folders later in settings."}
               </p>
 
               <div className="space-y-3">
                 <div className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors">
                   <p className="text-sm text-muted-foreground mb-2">
-                    Click to browse or drag folders here
+                    {isRTL ? "انقر للتصفح أو اسحب المجلدات هنا" : "Click to browse or drag folders here"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    (For now, you can add a sample path)
+                    {isRTL ? "(يمكنك إضافة مسار مثال)" : "(For now, you can add a sample path)"}
                   </p>
                   <input
                     type="text"
-                    placeholder="e.g., C:\\Users\\Documents"
-                    className="mt-4 w-full px-3 py-2 border border-border rounded-md bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder={isRTL ? "مثال: C:\\Users\\Documents" : "e.g., C:\\Users\\Documents"}
+                    className={`mt-4 w-full px-3 py-2 border border-border rounded-md bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${isRTL ? "text-right" : ""}`}
+                    dir={isRTL ? "rtl" : "ltr"}
                     value={selectedFolders[0] || ""}
                     onChange={(e) =>
                       setSelectedFolders([e.target.value].filter(Boolean))
@@ -145,7 +149,7 @@ export default function Onboarding() {
                     {selectedFolders.map((folder, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between p-3 bg-muted rounded-lg"
+                        className={`flex items-center justify-between p-3 bg-muted rounded-lg ${isRTL ? "flex-row-reverse" : ""}`}
                       >
                         <span className="text-sm text-foreground">
                           {folder}
@@ -158,7 +162,7 @@ export default function Onboarding() {
                           }
                           className="text-destructive hover:text-destructive text-sm"
                         >
-                          Remove
+                          {isRTL ? "إزالة" : "Remove"}
                         </button>
                       </div>
                     ))}
@@ -171,11 +175,12 @@ export default function Onboarding() {
           {step === "filetypes" && (
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-4">
-                Step 2: Select File Types
+                {isRTL ? "الخطوة 2: اختر أنواع الملفات" : "Step 2: Select File Types"}
               </h2>
               <p className="text-muted-foreground mb-6">
-                Choose which file types you want to scan for duplicates. You can
-                enable or disable these types at any time.
+                {isRTL 
+                  ? "اختر أنواع الملفات التي تريد فحصها للبحث عن التكرارات. يمكنك تفعيل أو تعطيل هذه الأنواع في أي وقت."
+                  : "Choose which file types you want to scan for duplicates. You can enable or disable these types at any time."}
               </p>
 
               <div className="grid grid-cols-2 gap-3">
@@ -189,17 +194,17 @@ export default function Onboarding() {
                         : "border-border bg-card hover:border-muted-foreground"
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
                       <div
                         className={`w-3 h-3 rounded-full ${option.color}`}
                       ></div>
-                      <div className="text-left">
+                      <div className={isRTL ? "text-right" : "text-left"}>
                         <p className="text-sm font-medium text-foreground">
                           {option.label}
                         </p>
                       </div>
                       {selectedFileTypes.includes(option.id) && (
-                        <Check className="w-5 h-5 text-primary ml-auto" />
+                        <Check className={`w-5 h-5 text-primary ${isRTL ? "mr-auto" : "ml-auto"}`} />
                       )}
                     </div>
                   </button>
@@ -211,38 +216,38 @@ export default function Onboarding() {
           {step === "ai" && (
             <div>
               <h2 className="text-2xl font-bold text-foreground mb-4">
-                Step 3: AI Sensitivity Level
+                {isRTL ? "الخطوة 3: مستوى حساسية الذكاء الاصطناعي" : "Step 3: AI Sensitivity Level"}
               </h2>
               <p className="text-muted-foreground mb-8">
-                Choose how sensitive the AI should be when detecting duplicate
-                files. Higher sensitivity means more duplicates detected but may
-                include false positives.
+                {isRTL 
+                  ? "اختر مدى حساسية الذكاء الاصطناعي عند اكتشاف الملفات المكررة. الحساسية الأعلى تعني اكتشاف المزيد من التكرارات ولكن قد تتضمن نتائج خاطئة."
+                  : "Choose how sensitive the AI should be when detecting duplicate files. Higher sensitivity means more duplicates detected but may include false positives."}
               </p>
 
               <div className="space-y-4">
-                {["low", "medium", "high"].map((level) => (
+                {[
+                  { level: "low", label: isRTL ? "حساسية منخفضة" : "Low Sensitivity", desc: isRTL ? "البحث عن التكرارات الواضحة فقط" : "Find only obvious duplicates" },
+                  { level: "medium", label: isRTL ? "حساسية متوسطة" : "Medium Sensitivity", desc: isRTL ? "توازن بين الكشف والدقة" : "Balanced detection and accuracy" },
+                  { level: "high", label: isRTL ? "حساسية عالية" : "High Sensitivity", desc: isRTL ? "البحث عن جميع التكرارات الممكنة" : "Find all possible duplicates" },
+                ].map(({ level, label, desc }) => (
                   <button
                     key={level}
                     onClick={() =>
                       setAiSensitivity(level as "low" | "medium" | "high")
                     }
-                    className={`w-full p-6 rounded-lg border-2 transition-all text-left ${
+                    className={`w-full p-6 rounded-lg border-2 transition-all ${isRTL ? "text-right" : "text-left"} ${
                       aiSensitivity === level
                         ? "border-primary bg-primary/10"
                         : "border-border bg-card hover:border-muted-foreground"
                     }`}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className={`flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
                       <div>
-                        <p className="font-semibold text-foreground capitalize">
-                          {level} Sensitivity
+                        <p className="font-semibold text-foreground">
+                          {label}
                         </p>
                         <p className="text-sm text-muted-foreground mt-1">
-                          {level === "low"
-                            ? "Find only obvious duplicates"
-                            : level === "medium"
-                              ? "Balanced detection and accuracy"
-                              : "Find all possible duplicates"}
+                          {desc}
                         </p>
                       </div>
                       {aiSensitivity === level && (
@@ -253,10 +258,12 @@ export default function Onboarding() {
                 ))}
               </div>
 
-              <div className="mt-8 p-4 bg-secondary/20 rounded-lg border border-secondary">
+              <div className={`mt-8 p-4 bg-secondary/20 rounded-lg border border-secondary ${isRTL ? "text-right" : ""}`}>
                 <p className="text-sm text-foreground">
-                  <span className="font-semibold">💡 Tip:</span> You can change
-                  the AI sensitivity level at any time in settings.
+                  <span className="font-semibold">💡 {isRTL ? "نصيحة:" : "Tip:"}</span>{" "}
+                  {isRTL 
+                    ? "يمكنك تغيير مستوى حساسية الذكاء الاصطناعي في أي وقت من الإعدادات."
+                    : "You can change the AI sensitivity level at any time in settings."}
                 </p>
               </div>
             </div>
@@ -264,40 +271,41 @@ export default function Onboarding() {
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between gap-4 mt-8">
+        <div className={`flex justify-between gap-4 mt-8 ${isRTL ? "flex-row-reverse" : ""}`}>
           <Button
             variant="outline"
             onClick={handleBack}
             disabled={step === "folders"}
-            className="flex items-center gap-2"
+            className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
           >
-            <ChevronLeft className="w-4 h-4" />
-            Back
+            {isRTL ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+            {isRTL ? "السابق" : "Back"}
           </Button>
 
-          <div className="flex gap-4">
+          <div className={`flex gap-4 ${isRTL ? "flex-row-reverse" : ""}`}>
             <Button
               variant="outline"
               onClick={() => {
                 setHasCompletedOnboarding(true);
+                localStorage.setItem("knoux_onboarding_completed", "true");
                 setCurrentPage("dashboard");
               }}
             >
-              Skip
+              {isRTL ? "تخطي" : "Skip"}
             </Button>
             <Button
               onClick={handleNext}
-              className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white"
+              className={`flex items-center gap-2 bg-primary hover:bg-primary/90 text-white ${isRTL ? "flex-row-reverse" : ""}`}
             >
               {step === "ai" ? (
                 <>
-                  Get Started
+                  {isRTL ? "ابدأ الآن" : "Get Started"}
                   <Check className="w-4 h-4" />
                 </>
               ) : (
                 <>
-                  Next
-                  <ChevronRight className="w-4 h-4" />
+                  {isRTL ? "التالي" : "Next"}
+                  {isRTL ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </>
               )}
             </Button>

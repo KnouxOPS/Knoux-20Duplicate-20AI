@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
 
 export default function Splash() {
-  const { setCurrentPage, hasCompletedOnboarding } = useApp();
+  const { setCurrentPage, hasCompletedOnboarding, t } = useApp();
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function Splash() {
 
         {/* Tagline */}
         <p className="text-xl text-muted-foreground mb-12 font-medium">
-          الذكاء في التنظيم، لا للتكرار
+          {t.app.tagline}
         </p>
 
         {/* Progress Bar */}
@@ -69,7 +69,7 @@ export default function Splash() {
 
         {/* Loading Text */}
         <p className="text-sm text-muted-foreground mt-6">
-          Loading Knoux Duplicate AI...
+          {t.app.loading}
         </p>
       </div>
     </div>

@@ -8,8 +8,6 @@ import {
   Trash2,
   Eye,
   CheckCircle,
-  HardDrive,
-  AlertCircle,
 } from "lucide-react";
 
 interface DuplicateFile {
@@ -39,7 +37,7 @@ interface DuplicateGroup {
 }
 
 export default function ScanPage() {
-  const { setCurrentPage } = useApp();
+  const { setCurrentPage, t, isRTL } = useApp();
   const { success, error: notifyError, info } = useNotification();
 
   const [scanning, setScanning] = useState(false);
@@ -51,14 +49,12 @@ export default function ScanPage() {
   );
   const [previewFile, setPreviewFile] = useState<DuplicateFile | null>(null);
 
-  // Toggle group expansion
   const toggleGroup = useCallback((groupId: string) => {
     setGroups((prev) =>
       prev.map((g) => (g.id === groupId ? { ...g, expanded: !g.expanded } : g)),
     );
   }, []);
 
-  // Toggle file selection
   const toggleFileSelection = useCallback((fileId: string) => {
     setSelectedForDelete((prev) => {
       const newSet = new Set(prev);
@@ -71,18 +67,14 @@ export default function ScanPage() {
     });
   }, []);
 
-  // Keep file and deselect others in group
   const keepFile = useCallback(
     (groupId: string, fileIndex: number) => {
       const group = groups.find((g) => g.id === groupId);
       if (!group) return;
 
       const newSelectedSet = new Set(selectedForDelete);
-
-      // Deselect the kept file
       newSelectedSet.delete(group.files[fileIndex].id);
 
-      // Select all other files for deletion
       group.files.forEach((file, idx) => {
         if (idx !== fileIndex) {
           newSelectedSet.add(file.id);
@@ -90,26 +82,21 @@ export default function ScanPage() {
       });
 
       setSelectedForDelete(newSelectedSet);
-      success(`${group.files[fileIndex].name} marked to keep`);
+      success(`${group.files[fileIndex].name} ${isRTL ? "تم تحديده للاحتفاظ" : "marked to keep"}`);
     },
-    [groups, selectedForDelete, success],
+    [groups, selectedForDelete, success, isRTL],
   );
 
-  // Delete selected files
   const handleDeleteFiles = useCallback(async () => {
     if (selectedForDelete.size === 0) {
-      notifyError("No files selected for deletion");
+      notifyError(isRTL ? "لم يتم تحديد ملفات للحذف" : "No files selected for deletion");
       return;
     }
 
     try {
       setScanning(true);
-
-      // In a real app, this would call the API
-      // For now, simulate the deletion
       const filesToDelete = Array.from(selectedForDelete);
 
-      // Update groups to remove deleted files
       setGroups((prev) =>
         prev
           .map((group) => ({
@@ -121,36 +108,45 @@ export default function ScanPage() {
 
       setSelectedForDelete(new Set());
 
-      success(`Successfully moved ${filesToDelete.length} files to trash`, {
-        description: "You can restore them from the trash if needed",
-      });
+      success(
+        isRTL 
+          ? `تم نقل ${filesToDelete.length} ملف إلى سلة المحذوفات بنجاح`
+          : `Successfully moved ${filesToDelete.length} files to trash`, 
+        {
+          description: isRTL 
+            ? "يمكنك استعادتها من سلة المحذوفات إذا لزم الأمر"
+            : "You can restore them from the trash if needed",
+        }
+      );
     } catch (err) {
-      notifyError("Failed to delete files");
+      notifyError(isRTL ? "فشل في حذف الملفات" : "Failed to delete files");
     } finally {
       setScanning(false);
     }
-  }, [selectedForDelete, success, notifyError]);
+  }, [selectedForDelete, success, notifyError, isRTL]);
 
-  // Start new scan
   const handleStartScan = useCallback(async () => {
     try {
       setScanning(true);
-      info("Starting duplicate scan...");
+      info(isRTL ? "جاري بدء فحص التكرارات..." : "Starting duplicate scan...");
 
-      // Simulate scan
       await new Promise((resolve) => setTimeout(resolve, 2000));
 
       const newGroups = generateMockDuplicates();
       setGroups(newGroups);
       setSelectedForDelete(new Set());
 
-      success(`Scan completed! Found ${newGroups.length} duplicate groups`);
+      success(
+        isRTL 
+          ? `اكتمل الفحص! تم العثور على ${newGroups.length} مجموعات مكررة`
+          : `Scan completed! Found ${newGroups.length} duplicate groups`
+      );
     } catch (err) {
-      notifyError("Scan failed");
+      notifyError(isRTL ? "فشل الفحص" : "Scan failed");
     } finally {
       setScanning(false);
     }
-  }, [success, notifyError, info]);
+  }, [success, notifyError, info, isRTL]);
 
   const totalSize = groups.reduce((sum, g) => sum + g.totalSize, 0);
   const totalRecoverable = groups.reduce(
@@ -158,21 +154,6 @@ export default function ScanPage() {
     0,
   );
   const totalFiles = groups.reduce((sum, g) => sum + g.fileCount, 0);
-
-  const getFileColor = (type: string) => {
-    switch (type) {
-      case "image":
-        return "bg-file-image";
-      case "video":
-        return "bg-file-video";
-      case "document":
-        return "bg-file-document";
-      case "audio":
-        return "bg-file-audio";
-      default:
-        return "bg-muted";
-    }
-  };
 
   const getTypeEmoji = (type: string) => {
     switch (type) {
@@ -189,55 +170,70 @@ export default function ScanPage() {
     }
   };
 
+  const getTypeLabel = (type: string) => {
+    if (isRTL) {
+      switch (type) {
+        case "image": return "صور";
+        case "video": return "فيديوهات";
+        case "document": return "مستندات";
+        case "audio": return "صوتيات";
+        default: return "أخرى";
+      }
+    }
+    return type.charAt(0).toUpperCase() + type.slice(1);
+  };
+
   return (
     <div className="h-screen w-full bg-background dark:bg-slate-900 flex flex-col">
       {/* Header */}
       <div className="border-b border-border bg-card p-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-4">
-            <div>
+          <div className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
+            <div className={isRTL ? "text-right" : ""}>
               <h1 className="text-3xl font-bold text-foreground">
-                Scan Results
+                {t.scan.title}
               </h1>
               <p className="text-muted-foreground mt-1">
-                Found {groups.length} duplicate groups with{" "}
-                {formatFileSize(totalRecoverable)} of recoverable space
+                {isRTL 
+                  ? `تم العثور على ${groups.length} مجموعات مكررة مع ${formatFileSize(totalRecoverable)} من المساحة القابلة للاستعادة`
+                  : `Found ${groups.length} duplicate groups with ${formatFileSize(totalRecoverable)} of recoverable space`
+                }
               </p>
             </div>
 
-            <div className="flex gap-3">
+            <div className={`flex gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
               <Button
                 onClick={() => setCurrentPage("dashboard")}
                 variant="outline"
               >
-                Back
+                {t.scan.back}
               </Button>
               <Button
                 onClick={handleStartScan}
                 disabled={scanning}
                 className="bg-primary hover:bg-primary/90 text-white"
               >
-                {scanning ? "Scanning..." : "New Scan"}
+                {scanning ? t.scan.scanning : t.scan.newScan}
               </Button>
             </div>
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4">
-            <div className="bg-muted rounded-lg p-4">
+            <div className={`bg-muted rounded-lg p-4 ${isRTL ? "text-right" : ""}`}>
               <p className="text-xs text-muted-foreground mb-1">
-                Total Duplicates
+                {t.scan.totalDuplicates}
               </p>
               <p className="text-2xl font-bold text-foreground">{totalFiles}</p>
             </div>
-            <div className="bg-muted rounded-lg p-4">
-              <p className="text-xs text-muted-foreground mb-1">Total Size</p>
+            <div className={`bg-muted rounded-lg p-4 ${isRTL ? "text-right" : ""}`}>
+              <p className="text-xs text-muted-foreground mb-1">{t.scan.totalSize}</p>
               <p className="text-2xl font-bold text-foreground">
                 {formatFileSize(totalSize)}
               </p>
             </div>
-            <div className="bg-secondary/20 rounded-lg p-4">
-              <p className="text-xs text-muted-foreground mb-1">Can Recover</p>
+            <div className={`bg-secondary/20 rounded-lg p-4 ${isRTL ? "text-right" : ""}`}>
+              <p className="text-xs text-muted-foreground mb-1">{t.scan.canRecover}</p>
               <p className="text-2xl font-bold text-secondary">
                 {formatFileSize(totalRecoverable)}
               </p>
@@ -253,16 +249,16 @@ export default function ScanPage() {
             <div className="bg-card border border-border rounded-lg p-12 text-center">
               <CheckCircle className="w-16 h-16 text-primary mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-foreground mb-2">
-                No Duplicates Found
+                {t.scan.noDuplicatesFound}
               </h2>
               <p className="text-muted-foreground mb-6">
-                Your system is clean! No duplicate files detected.
+                {t.scan.systemClean}
               </p>
               <Button
                 onClick={handleStartScan}
                 className="bg-primary hover:bg-primary/90 text-white"
               >
-                Run New Scan
+                {t.scan.runNewScan}
               </Button>
             </div>
           ) : (
@@ -275,29 +271,27 @@ export default function ScanPage() {
                   {/* Group Header */}
                   <button
                     onClick={() => toggleGroup(group.id)}
-                    className="w-full px-6 py-4 hover:bg-muted transition-colors flex items-center justify-between"
+                    className={`w-full px-6 py-4 hover:bg-muted transition-colors flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}
                   >
-                    <div className="flex items-center gap-4 flex-1">
+                    <div className={`flex items-center gap-4 flex-1 ${isRTL ? "flex-row-reverse" : ""}`}>
                       <div className="text-2xl">{getTypeEmoji(group.type)}</div>
-                      <div className="text-left">
+                      <div className={isRTL ? "text-right" : "text-left"}>
                         <p className="font-semibold text-foreground">
-                          {group.type.charAt(0).toUpperCase() +
-                            group.type.slice(1)}{" "}
-                          Duplicates
+                          {getTypeLabel(group.type)} {t.scan.duplicates}
                         </p>
                         <p className="text-sm text-muted-foreground">
-                          {group.fileCount} files • {group.totalSizeFormatted}
+                          {group.fileCount} {isRTL ? "ملفات" : "files"} • {group.totalSizeFormatted}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
+                    <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+                      <div className={isRTL ? "text-left" : "text-right"}>
                         <p className="text-sm font-medium text-secondary">
                           {group.recoverableSizeFormatted}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          recoverable
+                          {t.scan.recoverable}
                         </p>
                       </div>
 
@@ -315,7 +309,7 @@ export default function ScanPage() {
                       {group.files.map((file, idx) => (
                         <div
                           key={file.id}
-                          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${isRTL ? "flex-row-reverse" : ""} ${
                             selectedForDelete.has(file.id)
                               ? "bg-destructive/10 border border-destructive"
                               : "bg-background border border-border hover:border-primary"
@@ -330,29 +324,29 @@ export default function ScanPage() {
                           />
 
                           {/* File Info */}
-                          <div className="flex-1">
+                          <div className={`flex-1 ${isRTL ? "text-right" : ""}`}>
                             <p className="font-medium text-foreground text-sm">
                               {idx === group.bestFileIndex && (
-                                <span className="inline-block bg-primary text-white text-xs px-2 py-0.5 rounded mr-2">
-                                  Best
+                                <span className={`inline-block bg-primary text-white text-xs px-2 py-0.5 rounded ${isRTL ? "ml-2" : "mr-2"}`}>
+                                  {t.scan.best}
                                 </span>
                               )}
                               {file.name}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {file.sizeFormatted} • Modified:{" "}
-                              {new Date(file.modified).toLocaleDateString()}
+                              {file.sizeFormatted} • {isRTL ? "آخر تعديل:" : "Modified:"}{" "}
+                              {new Date(file.modified).toLocaleDateString(isRTL ? "ar-SA" : "en-US")}
                             </p>
                           </div>
 
                           {/* Actions */}
-                          <div className="flex gap-2">
+                          <div className={`flex gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
                             <Button
                               size="sm"
                               variant="ghost"
                               onClick={() => setPreviewFile(file)}
                               className="h-8 w-8 p-0"
-                              title="Preview file"
+                              title={t.scan.preview}
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -363,9 +357,9 @@ export default function ScanPage() {
                                 onClick={() => keepFile(group.id, idx)}
                                 className="h-8 px-2 text-xs"
                                 variant="outline"
-                                title="Keep this file"
+                                title={t.scan.keep}
                               >
-                                Keep
+                                {t.scan.keep}
                               </Button>
                             )}
                           </div>
@@ -378,26 +372,26 @@ export default function ScanPage() {
 
               {/* Action Footer */}
               {groups.length > 0 && (
-                <div className="sticky bottom-0 bg-card border-t border-border p-6 flex items-center justify-between">
-                  <div>
+                <div className={`sticky bottom-0 bg-card border-t border-border p-6 flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
+                  <div className={isRTL ? "text-right" : ""}>
                     <p className="text-sm text-foreground">
                       <span className="font-semibold">
                         {selectedForDelete.size}
                       </span>{" "}
-                      files selected for deletion
+                      {t.scan.filesSelectedForDeletion}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      These files will be moved to the safe trash
+                      {t.scan.movedToSafeTrash}
                     </p>
                   </div>
 
                   <Button
                     onClick={handleDeleteFiles}
                     disabled={selectedForDelete.size === 0 || scanning}
-                    className="bg-destructive hover:bg-destructive/90 text-white flex items-center gap-2"
+                    className={`bg-destructive hover:bg-destructive/90 text-white flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete Selected Files
+                    {t.scan.deleteSelectedFiles}
                   </Button>
                 </div>
               )}
@@ -410,9 +404,9 @@ export default function ScanPage() {
       {previewFile && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-card rounded-lg p-6 max-w-2xl w-full max-h-96 overflow-auto">
-            <div className="flex items-center justify-between mb-4">
+            <div className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
               <h2 className="text-lg font-bold text-foreground">
-                File Preview
+                {t.scan.filePreview}
               </h2>
               <button
                 onClick={() => setPreviewFile(null)}
@@ -423,55 +417,55 @@ export default function ScanPage() {
             </div>
 
             <div className="space-y-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Filename</p>
+              <div className={isRTL ? "text-right" : ""}>
+                <p className="text-sm text-muted-foreground mb-1">{t.scan.filename}</p>
                 <p className="font-mono text-sm text-foreground">
                   {previewFile.name}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Size</p>
+                <div className={isRTL ? "text-right" : ""}>
+                  <p className="text-sm text-muted-foreground mb-1">{t.scan.size}</p>
                   <p className="font-semibold text-foreground">
                     {previewFile.sizeFormatted}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Type</p>
+                <div className={isRTL ? "text-right" : ""}>
+                  <p className="text-sm text-muted-foreground mb-1">{t.scan.type}</p>
                   <p className="font-semibold text-foreground capitalize">
-                    {previewFile.type}
+                    {getTypeLabel(previewFile.type)}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Created</p>
+                <div className={isRTL ? "text-right" : ""}>
+                  <p className="text-sm text-muted-foreground mb-1">{t.scan.created}</p>
                   <p className="font-semibold text-foreground">
-                    {new Date(previewFile.created).toLocaleDateString()}
+                    {new Date(previewFile.created).toLocaleDateString(isRTL ? "ar-SA" : "en-US")}
                   </p>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Modified</p>
+                <div className={isRTL ? "text-right" : ""}>
+                  <p className="text-sm text-muted-foreground mb-1">{t.scan.modified}</p>
                   <p className="font-semibold text-foreground">
-                    {new Date(previewFile.modified).toLocaleDateString()}
+                    {new Date(previewFile.modified).toLocaleDateString(isRTL ? "ar-SA" : "en-US")}
                   </p>
                 </div>
               </div>
 
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Path</p>
-                <p className="font-mono text-xs text-muted-foreground break-all">
+              <div className={isRTL ? "text-right" : ""}>
+                <p className="text-sm text-muted-foreground mb-1">{t.scan.path}</p>
+                <p className={`font-mono text-xs text-muted-foreground break-all ${isRTL ? "direction-ltr" : ""}`}>
                   {previewFile.path}
                 </p>
               </div>
             </div>
 
-            <div className="flex gap-3 mt-6">
+            <div className={`flex gap-3 mt-6 ${isRTL ? "flex-row-reverse" : ""}`}>
               <Button
                 onClick={() => setPreviewFile(null)}
                 variant="outline"
                 className="flex-1"
               >
-                Close
+                {t.scan.close}
               </Button>
               <Button
                 onClick={() => {
@@ -481,8 +475,8 @@ export default function ScanPage() {
                 className="flex-1 bg-primary hover:bg-primary/90 text-white"
               >
                 {selectedForDelete.has(previewFile.id)
-                  ? "Keep This File"
-                  : "Delete This File"}
+                  ? t.scan.keepThisFile
+                  : t.scan.deleteThisFile}
               </Button>
             </div>
           </div>

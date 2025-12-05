@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { setCurrentPage, settings, updateSettings, isDarkMode } = useApp();
+  const { setCurrentPage, settings, updateSettings, isDarkMode, t, isRTL } = useApp();
   const { success } = useNotification();
 
   const [expandedSection, setExpandedSection] = useState<string | null>(
@@ -34,9 +34,9 @@ export default function SettingsPage() {
         scanPaths: [...prev.scanPaths, newFolder],
       }));
       setNewFolder("");
-      success("Folder added");
+      success(isRTL ? "تمت إضافة المجلد" : "Folder added");
     }
-  }, [newFolder, localSettings.scanPaths, success]);
+  }, [newFolder, localSettings.scanPaths, success, isRTL]);
 
   const handleRemoveFolder = useCallback((folder: string) => {
     setLocalSettings((prev) => ({
@@ -56,40 +56,47 @@ export default function SettingsPage() {
 
   const handleSaveSettings = useCallback(() => {
     updateSettings(localSettings);
-    success("Settings saved successfully");
-  }, [localSettings, updateSettings, success]);
+    success(isRTL ? "تم حفظ الإعدادات بنجاح" : "Settings saved successfully");
+  }, [localSettings, updateSettings, success, isRTL]);
 
   const handleReset = useCallback(() => {
     setLocalSettings({ ...settings });
-    success("Changes discarded");
-  }, [settings, success]);
+    success(isRTL ? "تم تجاهل التغييرات" : "Changes discarded");
+  }, [settings, success, isRTL]);
 
   const fileTypeOptions = [
-    { id: "jpg", label: "JPG Images", category: "images" },
-    { id: "png", label: "PNG Images", category: "images" },
-    { id: "gif", label: "GIF Images", category: "images" },
-    { id: "mp4", label: "MP4 Videos", category: "videos" },
-    { id: "mkv", label: "MKV Videos", category: "videos" },
-    { id: "avi", label: "AVI Videos", category: "videos" },
-    { id: "mp3", label: "MP3 Audio", category: "audio" },
-    { id: "wav", label: "WAV Audio", category: "audio" },
-    { id: "flac", label: "FLAC Audio", category: "audio" },
-    { id: "pdf", label: "PDF Documents", category: "documents" },
-    { id: "docx", label: "Word Documents", category: "documents" },
-    { id: "xlsx", label: "Excel Files", category: "documents" },
+    { id: "jpg", label: isRTL ? "صور JPG" : "JPG Images", category: "images" },
+    { id: "png", label: isRTL ? "صور PNG" : "PNG Images", category: "images" },
+    { id: "gif", label: isRTL ? "صور GIF" : "GIF Images", category: "images" },
+    { id: "mp4", label: isRTL ? "فيديو MP4" : "MP4 Videos", category: "videos" },
+    { id: "mkv", label: isRTL ? "فيديو MKV" : "MKV Videos", category: "videos" },
+    { id: "avi", label: isRTL ? "فيديو AVI" : "AVI Videos", category: "videos" },
+    { id: "mp3", label: isRTL ? "صوت MP3" : "MP3 Audio", category: "audio" },
+    { id: "wav", label: isRTL ? "صوت WAV" : "WAV Audio", category: "audio" },
+    { id: "flac", label: isRTL ? "صوت FLAC" : "FLAC Audio", category: "audio" },
+    { id: "pdf", label: isRTL ? "مستندات PDF" : "PDF Documents", category: "documents" },
+    { id: "docx", label: isRTL ? "مستندات Word" : "Word Documents", category: "documents" },
+    { id: "xlsx", label: isRTL ? "ملفات Excel" : "Excel Files", category: "documents" },
   ];
+
+  const categoryLabels: Record<string, string> = {
+    images: isRTL ? "الصور" : "Images",
+    videos: isRTL ? "الفيديوهات" : "Videos",
+    audio: isRTL ? "الصوتيات" : "Audio",
+    documents: isRTL ? "المستندات" : "Documents",
+  };
 
   const sections = [
     {
       id: "general",
-      title: "General Settings",
+      title: t.settings.generalSettings,
       icon: Settings,
       content: (
         <div className="space-y-6">
           {/* Language */}
-          <div>
+          <div className={isRTL ? "text-right" : ""}>
             <label className="block text-sm font-medium text-foreground mb-2">
-              Language
+              {t.settings.language}
             </label>
             <select
               value={localSettings.language}
@@ -99,7 +106,8 @@ export default function SettingsPage() {
                   language: e.target.value as "en" | "ar",
                 }))
               }
-              className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className={`w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${isRTL ? "text-right" : ""}`}
+              dir={isRTL ? "rtl" : "ltr"}
             >
               <option value="en">English</option>
               <option value="ar">العربية</option>
@@ -107,15 +115,19 @@ export default function SettingsPage() {
           </div>
 
           {/* AI Sensitivity */}
-          <div>
+          <div className={isRTL ? "text-right" : ""}>
             <label className="block text-sm font-medium text-foreground mb-3">
-              AI Sensitivity Level
+              {t.settings.aiSensitivity}
             </label>
             <div className="space-y-2">
-              {["low", "medium", "high"].map((level) => (
+              {[
+                { level: "low", label: t.settings.low, desc: t.settings.lowDesc },
+                { level: "medium", label: t.settings.medium, desc: t.settings.mediumDesc },
+                { level: "high", label: t.settings.high, desc: t.settings.highDesc },
+              ].map(({ level, label, desc }) => (
                 <label
                   key={level}
-                  className="flex items-center gap-3 p-3 border border-border rounded-lg cursor-pointer hover:bg-muted transition-colors"
+                  className={`flex items-center gap-3 p-3 border border-border rounded-lg cursor-pointer hover:bg-muted transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
                 >
                   <input
                     type="radio"
@@ -133,16 +145,12 @@ export default function SettingsPage() {
                     }
                     className="w-4 h-4"
                   />
-                  <div>
-                    <p className="font-medium text-foreground capitalize">
-                      {level}
+                  <div className={isRTL ? "text-right" : ""}>
+                    <p className="font-medium text-foreground">
+                      {label}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {level === "low"
-                        ? "Find only obvious duplicates"
-                        : level === "medium"
-                          ? "Balanced detection and accuracy"
-                          : "Find all possible duplicates"}
+                      {desc}
                     </p>
                   </div>
                 </label>
@@ -151,11 +159,11 @@ export default function SettingsPage() {
           </div>
 
           {/* Notifications */}
-          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-            <div>
-              <p className="font-medium text-foreground">Show Notifications</p>
+          <div className={`flex items-center justify-between p-4 bg-muted rounded-lg ${isRTL ? "flex-row-reverse" : ""}`}>
+            <div className={isRTL ? "text-right" : ""}>
+              <p className="font-medium text-foreground">{t.settings.showNotifications}</p>
               <p className="text-xs text-muted-foreground">
-                Display alerts during scanning and operations
+                {t.settings.notificationsDesc}
               </p>
             </div>
             <input
@@ -175,19 +183,19 @@ export default function SettingsPage() {
     },
     {
       id: "folders",
-      title: "Scan Folders",
+      title: t.settings.scanFolders,
       icon: "📁",
       content: (
-        <div className="space-y-4">
+        <div className={`space-y-4 ${isRTL ? "text-right" : ""}`}>
           <p className="text-sm text-muted-foreground">
-            Choose which folders to scan for duplicate files
+            {t.settings.scanFoldersDesc}
           </p>
 
           <div className="space-y-2">
             {localSettings.scanPaths.map((folder) => (
               <div
                 key={folder}
-                className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border"
+                className={`flex items-center justify-between p-4 bg-muted rounded-lg border border-border ${isRTL ? "flex-row-reverse" : ""}`}
               >
                 <p className="text-sm text-foreground break-all">{folder}</p>
                 <button
@@ -201,27 +209,28 @@ export default function SettingsPage() {
           </div>
 
           {localSettings.scanPaths.length === 0 && (
-            <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-900 dark:text-amber-300">
-              <AlertCircle className="w-4 h-4 inline mr-2" />
-              No folders selected. Add folders to start scanning.
+            <div className={`p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-900 dark:text-amber-300 ${isRTL ? "flex-row-reverse" : ""}`}>
+              <AlertCircle className={`w-4 h-4 inline ${isRTL ? "ml-2" : "mr-2"}`} />
+              {t.settings.noFoldersSelected}
             </div>
           )}
 
-          <div className="flex gap-2 mt-6">
+          <div className={`flex gap-2 mt-6 ${isRTL ? "flex-row-reverse" : ""}`}>
             <input
               type="text"
-              placeholder="e.g., C:\\Users\\Documents"
+              placeholder={isRTL ? "مثال: C:\\Users\\Documents" : "e.g., C:\\Users\\Documents"}
               value={newFolder}
               onChange={(e) => setNewFolder(e.target.value)}
               onKeyPress={(e) => e.key === "Enter" && handleAddFolder()}
-              className="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className={`flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary ${isRTL ? "text-right" : ""}`}
+              dir={isRTL ? "rtl" : "ltr"}
             />
             <Button
               onClick={handleAddFolder}
-              className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
+              className={`bg-primary hover:bg-primary/90 text-white flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
             >
               <Plus className="w-4 h-4" />
-              Add
+              {t.settings.addFolder}
             </Button>
           </div>
         </div>
@@ -229,18 +238,18 @@ export default function SettingsPage() {
     },
     {
       id: "filetypes",
-      title: "File Types",
+      title: t.settings.fileTypes,
       icon: "📄",
       content: (
-        <div className="space-y-4">
+        <div className={`space-y-4 ${isRTL ? "text-right" : ""}`}>
           <p className="text-sm text-muted-foreground">
-            Select which file types to include in scans
+            {t.settings.fileTypesDesc}
           </p>
 
           {["images", "videos", "audio", "documents"].map((category) => (
             <div key={category}>
-              <p className="text-sm font-semibold text-foreground mb-2 capitalize">
-                {category}
+              <p className="text-sm font-semibold text-foreground mb-2">
+                {categoryLabels[category]}
               </p>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                 {fileTypeOptions
@@ -248,7 +257,7 @@ export default function SettingsPage() {
                   .map((option) => (
                     <label
                       key={option.id}
-                      className="flex items-center gap-2 p-3 border border-border rounded-lg cursor-pointer hover:bg-muted transition-colors"
+                      className={`flex items-center gap-2 p-3 border border-border rounded-lg cursor-pointer hover:bg-muted transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
                     >
                       <input
                         type="checkbox"
@@ -269,45 +278,45 @@ export default function SettingsPage() {
     },
     {
       id: "theme",
-      title: "Theme & Colors",
+      title: t.settings.themeColors,
       icon: "🎨",
       content: (
-        <div className="space-y-6">
+        <div className={`space-y-6 ${isRTL ? "text-right" : ""}`}>
           <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p className="text-sm text-amber-900 dark:text-amber-300">
-              Current theme:{" "}
+              {t.settings.currentTheme}:{" "}
               <span className="font-semibold">
-                {isDarkMode ? "Dark Mode" : "Light Mode"}
+                {isDarkMode ? (isRTL ? "الوضع الداكن" : "Dark Mode") : (isRTL ? "الوضع الفاتح" : "Light Mode")}
               </span>
             </p>
             <p className="text-xs text-amber-800 dark:text-amber-400 mt-1">
-              Use the toggle in the sidebar to switch themes
+              {isRTL ? "استخدم زر التبديل في الشريط الجانبي لتغيير السمة" : "Use the toggle in the sidebar to switch themes"}
             </p>
           </div>
 
           <div>
             <p className="text-sm font-semibold text-foreground mb-4">
-              Color Scheme
+              {t.settings.colorScheme}
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 {
-                  name: "Primary",
+                  name: t.settings.primary,
                   key: "primary" as const,
                   current: localSettings.themeColors.primary,
                 },
                 {
-                  name: "Secondary",
+                  name: t.settings.secondary,
                   key: "secondary" as const,
                   current: localSettings.themeColors.secondary,
                 },
                 {
-                  name: "Highlight",
+                  name: t.settings.highlight,
                   key: "highlight" as const,
                   current: localSettings.themeColors.highlight,
                 },
                 {
-                  name: "Background",
+                  name: t.settings.background,
                   key: "background" as const,
                   current: localSettings.themeColors.background,
                 },
@@ -339,15 +348,15 @@ export default function SettingsPage() {
     },
     {
       id: "safety",
-      title: "Safety & Trash",
+      title: t.settings.safetyTrash,
       icon: "🗑️",
       content: (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-            <div>
-              <p className="font-medium text-foreground">Safe Trash Enabled</p>
+        <div className={`space-y-6 ${isRTL ? "text-right" : ""}`}>
+          <div className={`flex items-center justify-between p-4 bg-muted rounded-lg ${isRTL ? "flex-row-reverse" : ""}`}>
+            <div className={isRTL ? "text-right" : ""}>
+              <p className="font-medium text-foreground">{t.settings.safeTrashEnabled}</p>
               <p className="text-xs text-muted-foreground">
-                Files move to trash before permanent deletion
+                {t.settings.safeTrashDesc}
               </p>
             </div>
             <input
@@ -365,12 +374,12 @@ export default function SettingsPage() {
 
           <div className="p-4 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-lg">
             <p className="text-sm text-blue-900 dark:text-blue-300 font-medium mb-2">
-              💡 Safe Trash Benefits
+              💡 {t.settings.safeTrashBenefits}
             </p>
             <ul className="text-xs text-blue-800 dark:text-blue-400 space-y-1">
-              <li>✓ Recover files if deleted by mistake</li>
-              <li>✓ Review before permanent deletion</li>
-              <li>✓ Organize and manage deleted files</li>
+              <li>✓ {t.settings.recoverFiles}</li>
+              <li>✓ {t.settings.reviewBeforeDelete}</li>
+              <li>✓ {t.settings.organizeDeleted}</li>
             </ul>
           </div>
         </div>
@@ -382,19 +391,19 @@ export default function SettingsPage() {
     <div className="h-screen w-full bg-background dark:bg-slate-900 flex flex-col">
       {/* Header */}
       <div className="border-b border-border bg-card p-6">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
+        <div className={`max-w-4xl mx-auto flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}>
+          <div className={isRTL ? "text-right" : ""}>
+            <h1 className={`text-3xl font-bold text-foreground flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
               <Settings className="w-8 h-8 text-primary" />
-              Settings
+              {t.settings.title}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Customize your Knoux experience
+              {t.settings.subtitle}
             </p>
           </div>
 
           <Button onClick={() => setCurrentPage("dashboard")} variant="outline">
-            Back
+            {t.settings.back}
           </Button>
         </div>
       </div>
@@ -409,7 +418,7 @@ export default function SettingsPage() {
             >
               <button
                 onClick={() => toggleSection(section.id)}
-                className="w-full px-6 py-4 hover:bg-muted transition-colors flex items-center justify-between"
+                className={`w-full px-6 py-4 hover:bg-muted transition-colors flex items-center justify-between ${isRTL ? "flex-row-reverse" : ""}`}
               >
                 <h2 className="text-lg font-semibold text-foreground">
                   {section.title}
@@ -434,17 +443,17 @@ export default function SettingsPage() {
 
       {/* Footer */}
       <div className="border-t border-border bg-card p-6">
-        <div className="max-w-4xl mx-auto flex justify-end gap-3">
-          <Button onClick={handleReset} variant="outline">
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Discard Changes
+        <div className={`max-w-4xl mx-auto flex justify-end gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
+          <Button onClick={handleReset} variant="outline" className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+            <RotateCcw className="w-4 h-4" />
+            {t.settings.discardChanges}
           </Button>
           <Button
             onClick={handleSaveSettings}
-            className="bg-primary hover:bg-primary/90 text-white flex items-center gap-2"
+            className={`bg-primary hover:bg-primary/90 text-white flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
           >
             <Save className="w-4 h-4" />
-            Save Settings
+            {t.settings.saveSettings}
           </Button>
         </div>
       </div>

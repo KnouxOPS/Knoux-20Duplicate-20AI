@@ -42,7 +42,7 @@ export const DEFAULT_SETTINGS: KnouxSettings = {
     highlight: "#ffcc00",
     background: "#1e1e1e",
   },
-  language: "en",
+  language: "ar",
   scanExclusions: [
     "node_modules",
     ".git",

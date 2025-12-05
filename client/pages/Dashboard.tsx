@@ -15,58 +15,58 @@ import {
 import { useState } from "react";
 
 export default function Dashboard() {
-  const { setCurrentPage, isDarkMode, setIsDarkMode } = useApp();
+  const { setCurrentPage, isDarkMode, setIsDarkMode, t, isRTL } = useApp();
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const navigationItems = [
     {
       id: "dashboard",
-      label: "Dashboard",
+      label: t.nav.dashboard,
       icon: BarChart3,
       current: true,
     },
     {
       id: "scan",
-      label: "Scan Now",
+      label: t.nav.scanNow,
       icon: Scan,
       current: false,
     },
     {
       id: "rules",
-      label: "Rules & Batch Actions",
+      label: t.nav.rules,
       icon: Grid3x3,
       current: false,
     },
     {
       id: "settings",
-      label: "Settings",
+      label: t.nav.settings,
       icon: Settings,
       current: false,
     },
     {
       id: "help",
-      label: "Help / About",
+      label: t.nav.help,
       icon: HelpCircle,
       current: false,
     },
   ];
 
   return (
-    <div className="h-screen flex bg-background dark:bg-slate-900">
+    <div className={`h-screen flex bg-background dark:bg-slate-900 ${isRTL ? "flex-row-reverse" : ""}`}>
       {/* Sidebar */}
       <aside
         className={`${
           sidebarOpen ? "w-64" : "w-20"
-        } bg-sidebar border-r border-sidebar-border transition-all duration-300 flex flex-col`}
+        } bg-sidebar border-${isRTL ? "l" : "r"} border-sidebar-border transition-all duration-300 flex flex-col`}
       >
         {/* Logo */}
         <div className="p-6 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
+          <div className={`flex items-center gap-3 ${isRTL ? "flex-row-reverse" : ""}`}>
             <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-lg">
               K
             </div>
             {sidebarOpen && (
-              <div>
+              <div className={isRTL ? "text-right" : ""}>
                 <p className="font-bold text-foreground">Knoux</p>
                 <p className="text-xs text-muted-foreground">AI Duplicate</p>
               </div>
@@ -82,7 +82,7 @@ export default function Dashboard() {
               <button
                 key={item.id}
                 onClick={() => setCurrentPage(item.id as any)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isRTL ? "flex-row-reverse text-right" : ""} ${
                   item.current
                     ? "bg-sidebar-primary text-sidebar-primary-foreground"
                     : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
@@ -102,8 +102,8 @@ export default function Dashboard() {
         <div className="p-4 border-t border-sidebar-border space-y-2">
           <button
             onClick={() => setIsDarkMode(!isDarkMode)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-            title={sidebarOpen ? "" : isDarkMode ? "Light Mode" : "Dark Mode"}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
+            title={sidebarOpen ? "" : isDarkMode ? t.nav.lightMode : t.nav.darkMode}
           >
             {isDarkMode ? (
               <Sun className="w-5 h-5 flex-shrink-0" />
@@ -112,20 +112,20 @@ export default function Dashboard() {
             )}
             {sidebarOpen && (
               <span className="text-sm font-medium">
-                {isDarkMode ? "Light Mode" : "Dark Mode"}
+                {isDarkMode ? t.nav.lightMode : t.nav.darkMode}
               </span>
             )}
           </button>
 
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
-            title={sidebarOpen ? "" : "Expand"}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sidebar-foreground hover:bg-sidebar-accent transition-colors ${isRTL ? "flex-row-reverse" : ""}`}
+            title={sidebarOpen ? "" : t.nav.expand}
           >
             <Menu className="w-5 h-5 flex-shrink-0" />
             {sidebarOpen && (
               <span className="text-sm font-medium">
-                {sidebarOpen ? "Collapse" : "Expand"}
+                {sidebarOpen ? t.nav.collapse : t.nav.expand}
               </span>
             )}
           </button>
@@ -137,12 +137,12 @@ export default function Dashboard() {
         <div className="p-8">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
-            <div className="mb-8">
+            <div className={`mb-8 ${isRTL ? "text-right" : ""}`}>
               <h1 className="text-4xl font-bold text-foreground mb-2">
-                Dashboard
+                {t.dashboard.title}
               </h1>
               <p className="text-muted-foreground">
-                Monitor your system's duplicate files at a glance
+                {t.dashboard.subtitle}
               </p>
             </div>
 
@@ -150,57 +150,57 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               {/* Total Files */}
               <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow animate-fade-in-up">
-                <div className="flex items-center justify-between mb-4">
+                <div className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
                   <p className="text-sm text-muted-foreground font-medium">
-                    Total Files
+                    {t.dashboard.totalFiles}
                   </p>
                   <FileText className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-3xl font-bold text-foreground">0</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Across all folders
+                <p className={`text-3xl font-bold text-foreground ${isRTL ? "text-right" : ""}`}>0</p>
+                <p className={`text-xs text-muted-foreground mt-2 ${isRTL ? "text-right" : ""}`}>
+                  {t.dashboard.acrossAllFolders}
                 </p>
               </div>
 
               {/* Duplicates Found */}
               <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow animate-fade-in-up">
-                <div className="flex items-center justify-between mb-4">
+                <div className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
                   <p className="text-sm text-muted-foreground font-medium">
-                    Duplicates Found
+                    {t.dashboard.duplicatesFound}
                   </p>
                   <Scan className="w-5 h-5 text-destructive" />
                 </div>
-                <p className="text-3xl font-bold text-foreground">0</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Duplicate copies detected
+                <p className={`text-3xl font-bold text-foreground ${isRTL ? "text-right" : ""}`}>0</p>
+                <p className={`text-xs text-muted-foreground mt-2 ${isRTL ? "text-right" : ""}`}>
+                  {t.dashboard.duplicateCopies}
                 </p>
               </div>
 
               {/* Total Duplicates Size */}
               <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow animate-fade-in-up">
-                <div className="flex items-center justify-between mb-4">
+                <div className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
                   <p className="text-sm text-muted-foreground font-medium">
-                    Total Size
+                    {t.dashboard.totalSize}
                   </p>
                   <Trash2 className="w-5 h-5 text-accent" />
                 </div>
-                <p className="text-3xl font-bold text-foreground">0 MB</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Possible savings
+                <p className={`text-3xl font-bold text-foreground ${isRTL ? "text-right" : ""}`}>0 MB</p>
+                <p className={`text-xs text-muted-foreground mt-2 ${isRTL ? "text-right" : ""}`}>
+                  {t.dashboard.possibleSavings}
                 </p>
               </div>
 
               {/* Storage Efficiency */}
               <div className="bg-card border border-border rounded-lg p-6 hover:shadow-lg transition-shadow animate-fade-in-up">
-                <div className="flex items-center justify-between mb-4">
+                <div className={`flex items-center justify-between mb-4 ${isRTL ? "flex-row-reverse" : ""}`}>
                   <p className="text-sm text-muted-foreground font-medium">
-                    Storage Efficiency
+                    {t.dashboard.storageEfficiency}
                   </p>
                   <BarChart3 className="w-5 h-5 text-secondary" />
                 </div>
-                <p className="text-3xl font-bold text-foreground">100%</p>
-                <p className="text-xs text-muted-foreground mt-2">
-                  No duplicates yet
+                <p className={`text-3xl font-bold text-foreground ${isRTL ? "text-right" : ""}`}>100%</p>
+                <p className={`text-xs text-muted-foreground mt-2 ${isRTL ? "text-right" : ""}`}>
+                  {t.dashboard.noDuplicatesYet}
                 </p>
               </div>
             </div>
@@ -208,127 +208,126 @@ export default function Dashboard() {
             {/* File Type Distribution */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <div className="bg-card border border-border rounded-lg p-6 animate-fade-in-up">
-                <h2 className="text-lg font-semibold text-foreground mb-6">
-                  File Type Distribution
+                <h2 className={`text-lg font-semibold text-foreground mb-6 ${isRTL ? "text-right" : ""}`}>
+                  {t.dashboard.fileTypeDistribution}
                 </h2>
 
                 <div className="space-y-4">
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                    <div className={`flex items-center justify-between mb-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+                      <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
                         <div className="w-3 h-3 rounded-full bg-file-image"></div>
-                        <span className="text-sm text-foreground">Images</span>
+                        <span className="text-sm text-foreground">{t.dashboard.images}</span>
                       </div>
                       <span className="text-sm font-medium text-foreground">
-                        0 files
+                        0 {t.dashboard.files}
                       </span>
                     </div>
                     <div className="w-full bg-border rounded-full h-2">
-                      <div className="bg-file-image h-2 rounded-full w-0"></div>
+                      <div className={`bg-file-image h-2 rounded-full w-0 ${isRTL ? "float-right" : ""}`}></div>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                    <div className={`flex items-center justify-between mb-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+                      <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
                         <div className="w-3 h-3 rounded-full bg-file-video"></div>
-                        <span className="text-sm text-foreground">Videos</span>
+                        <span className="text-sm text-foreground">{t.dashboard.videos}</span>
                       </div>
                       <span className="text-sm font-medium text-foreground">
-                        0 files
+                        0 {t.dashboard.files}
                       </span>
                     </div>
                     <div className="w-full bg-border rounded-full h-2">
-                      <div className="bg-file-video h-2 rounded-full w-0"></div>
+                      <div className={`bg-file-video h-2 rounded-full w-0 ${isRTL ? "float-right" : ""}`}></div>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                    <div className={`flex items-center justify-between mb-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+                      <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
                         <div className="w-3 h-3 rounded-full bg-file-document"></div>
                         <span className="text-sm text-foreground">
-                          Documents
+                          {t.dashboard.documents}
                         </span>
                       </div>
                       <span className="text-sm font-medium text-foreground">
-                        0 files
+                        0 {t.dashboard.files}
                       </span>
                     </div>
                     <div className="w-full bg-border rounded-full h-2">
-                      <div className="bg-file-document h-2 rounded-full w-0"></div>
+                      <div className={`bg-file-document h-2 rounded-full w-0 ${isRTL ? "float-right" : ""}`}></div>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
+                    <div className={`flex items-center justify-between mb-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+                      <div className={`flex items-center gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
                         <div className="w-3 h-3 rounded-full bg-file-audio"></div>
-                        <span className="text-sm text-foreground">Audio</span>
+                        <span className="text-sm text-foreground">{t.dashboard.audio}</span>
                       </div>
                       <span className="text-sm font-medium text-foreground">
-                        0 files
+                        0 {t.dashboard.files}
                       </span>
                     </div>
                     <div className="w-full bg-border rounded-full h-2">
-                      <div className="bg-file-audio h-2 rounded-full w-0"></div>
+                      <div className={`bg-file-audio h-2 rounded-full w-0 ${isRTL ? "float-right" : ""}`}></div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Recent Activity */}
+              {/* Quick Tips */}
               <div className="bg-card border border-border rounded-lg p-6 animate-fade-in-up">
-                <h2 className="text-lg font-semibold text-foreground mb-6">
-                  Quick Tips
+                <h2 className={`text-lg font-semibold text-foreground mb-6 ${isRTL ? "text-right" : ""}`}>
+                  {t.dashboard.quickTips}
                 </h2>
 
                 <div className="space-y-4">
-                  <div className="flex gap-3">
-                    <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></div>
+                  <div className={`flex gap-3 ${isRTL ? "flex-row-reverse text-right" : ""}`}>
+                    <div className={`w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0`}></div>
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        Start a Scan
+                        {t.dashboard.startScan}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Click "Scan Now" to begin detecting duplicates
+                        {t.dashboard.startScanDesc}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className={`flex gap-3 ${isRTL ? "flex-row-reverse text-right" : ""}`}>
                     <div className="w-2 h-2 rounded-full bg-secondary mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        AI Smart Detection
+                        {t.dashboard.aiDetection}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Uses advanced AI to find true duplicates, not just by
-                        name
+                        {t.dashboard.aiDetectionDesc}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className={`flex gap-3 ${isRTL ? "flex-row-reverse text-right" : ""}`}>
                     <div className="w-2 h-2 rounded-full bg-accent mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        Safe Deletion
+                        {t.dashboard.safeDeletion}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Files are moved to safe trash before permanent deletion
+                        {t.dashboard.safeDeletionDesc}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex gap-3">
+                  <div className={`flex gap-3 ${isRTL ? "flex-row-reverse text-right" : ""}`}>
                     <div className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0"></div>
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        Batch Actions
+                        {t.dashboard.batchActions}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Create rules to automatically handle duplicate files
+                        {t.dashboard.batchActionsDesc}
                       </p>
                     </div>
                   </div>
@@ -337,20 +336,19 @@ export default function Dashboard() {
             </div>
 
             {/* Call to Action */}
-            <div className="bg-gradient-to-r from-primary to-purple-700 rounded-lg p-8 text-white animate-fade-in-up">
+            <div className={`bg-gradient-to-r ${isRTL ? "from-purple-700 to-primary" : "from-primary to-purple-700"} rounded-lg p-8 text-white animate-fade-in-up ${isRTL ? "text-right" : ""}`}>
               <h2 className="text-2xl font-bold mb-4">
-                Ready to Clean Your System?
+                {t.dashboard.readyToClean}
               </h2>
               <p className="mb-6 text-white/90">
-                Start a duplicate scan now to discover hidden duplicates and
-                reclaim valuable storage space.
+                {t.dashboard.readyToCleanDesc}
               </p>
               <Button
                 onClick={() => setCurrentPage("scan")}
-                className="bg-white text-primary hover:bg-white/90 font-semibold"
+                className={`bg-white text-primary hover:bg-white/90 font-semibold ${isRTL ? "flex-row-reverse" : ""}`}
               >
-                <Scan className="w-4 h-4 mr-2" />
-                Start Scan Now
+                <Scan className={`w-4 h-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+                {t.dashboard.startScanNow}
               </Button>
             </div>
           </div>
