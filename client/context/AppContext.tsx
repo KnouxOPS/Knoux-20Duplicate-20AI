@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { KnouxSettings, DEFAULT_SETTINGS } from "@shared/settings";
+import { translations, Language } from "@/lib/i18n";
 
 export type AppPage =
   | "splash"
@@ -23,6 +24,9 @@ interface AppContextType {
   setIsDarkMode: (dark: boolean) => void;
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (completed: boolean) => void;
+  language: Language;
+  t: typeof translations.ar;
+  isRTL: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -72,6 +76,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("knoux_settings", JSON.stringify(updated));
   };
 
+  const language = settings.language as Language;
+  const t = translations[language];
+  const isRTL = language === "ar";
+
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? "rtl" : "ltr";
+    document.documentElement.lang = language;
+  }, [language, isRTL]);
+
   return (
     <AppContext.Provider
       value={{
@@ -83,6 +96,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setIsDarkMode,
         hasCompletedOnboarding,
         setHasCompletedOnboarding,
+        language,
+        t,
+        isRTL,
       }}
     >
       {children}
