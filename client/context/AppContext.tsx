@@ -1,36 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { KnouxSettings, DEFAULT_SETTINGS } from "@shared/settings";
 
 export type AppPage = "splash" | "onboarding" | "dashboard" | "scan" | "settings" | "rules" | "help";
 
-export interface AppSettings {
-  scanPaths: string[];
-  fileTypes: string[];
-  aiSensitivity: "low" | "medium" | "high";
-  trashEnabled: boolean;
-  darkMode: boolean;
-  language: "en" | "ar";
-  themeColors: {
-    primary: string;
-    secondary: string;
-    highlight: string;
-    background: string;
-  };
-}
+export type AppSettings = KnouxSettings;
 
-export const defaultSettings: AppSettings = {
-  scanPaths: [],
-  fileTypes: ["jpg", "png", "mp4", "mp3", "pdf", "docx", "xlsx"],
-  aiSensitivity: "high",
-  trashEnabled: true,
-  darkMode: false,
-  language: "en",
-  themeColors: {
-    primary: "#6a0dad",
-    secondary: "#ffffff",
-    highlight: "#ffcc00",
-    background: "#1e1e1e",
-  },
-};
+export const defaultSettings: AppSettings = DEFAULT_SETTINGS;
 
 interface AppContextType {
   currentPage: AppPage;
