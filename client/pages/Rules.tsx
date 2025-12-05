@@ -38,10 +38,14 @@ export default function RulesPage() {
 
   const [showNewRuleForm, setShowNewRuleForm] = useState(false);
   const [expandedRule, setExpandedRule] = useState<string | null>(null);
-  const [newRule, setNewRule] = useState({
+  const [newRule, setNewRule] = useState<{
+    name: string;
+    type: "keep_largest" | "keep_newest" | "keep_best_quality" | "custom";
+    category: "image" | "video" | "document" | "audio" | "all";
+  }>({
     name: "",
-    type: "keep_largest" as const,
-    category: "all" as const,
+    type: "keep_largest",
+    category: "all",
   });
 
   const ruleTypes = [

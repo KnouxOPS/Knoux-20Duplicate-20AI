@@ -94,8 +94,9 @@ Knoux Duplicate AI helps users:
 
 ## Recent Changes (December 5, 2025)
 - Configured Vite for Replit environment (port 5000, HMR via WSS)
-- Fixed import errors in notification hooks
-- Fixed invalid Lucide icon imports
+- Fixed import errors in notification hooks (sonner import)
+- Fixed invalid Lucide icon imports (Toggle2 -> ToggleLeft)
+- Fixed TypeScript type narrowing in Rules.tsx
 - Set up deployment configuration
 - Installed all dependencies via PNPM
 - Verified application runs successfully
@@ -103,6 +104,17 @@ Knoux Duplicate AI helps users:
 ## Status
 ✅ Application is running and functional
 ✅ Frontend loads successfully (Splash screen visible)
-✅ Backend API is integrated
+✅ Backend API is integrated and responding
 ✅ WebSocket HMR is working
 ✅ Deployment configuration is complete
+✅ All TypeScript errors resolved
+
+## Project Features Summary
+- **Splash Screen**: Logo + Arabic tagline "الذكاء في التنظيم، لا للتكرار" + Progress bar
+- **Onboarding**: 3-step wizard (Folders, File Types, AI Sensitivity)
+- **Dashboard**: Stats, File Type Distribution, Quick Tips, Sidebar navigation
+- **Scan**: File scanning functionality with duplicate detection
+- **Rules**: Create and manage auto-delete rules (Keep Largest, Newest, Best Quality)
+- **Settings**: Theme toggle, AI sensitivity, file type selection
+- **Help**: Documentation and support information
+- **Backend APIs**: Duplicate detection, Safe Trash, Rules management, Preview generation
